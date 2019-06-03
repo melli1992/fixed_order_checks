@@ -2,6 +2,7 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_monte.h>
 #include <gsl/gsl_monte_vegas.h>
+#include <vector>
 #include "parameters.h"
 #include "k_factors_dy.h"
 
@@ -9,8 +10,10 @@
 #define MONTE_H
 
 struct results{double res; double err;};
+struct functionint{gsl_monte_function G; std::vector<double> xl; std::vector<double> xu;};
 void display_results(std::string title, double &result, double &error);
-results call_vegas(std::string integrand, double *xl, double *xu, lumni_params params, bool verbal = false,  bool high_prec = false);
+functionint init_vegas(std::string order, std::string power="full", std::string process = "qqbar", bool integrated = false);
+results call_vegas(functionint integrand, /*gsl_monte_function G, double *xl, double *xu,*/ lumni_params params, bool verbal = false,  bool high_prec = false);
 double integrand(double *k, size_t dim, void *params);
 
 

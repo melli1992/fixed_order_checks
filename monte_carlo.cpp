@@ -13,7 +13,7 @@
 using namespace std;
 
 /////////////////////////////////////////////////////////////////////
-/// this contains a call to vegas and a function to write the results
+/// this contains a call to vegas and a functionint to write the results
 /////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////
@@ -25,64 +25,217 @@ void display_results(string title, double &result, double &error){
 	cout << "sigma = " << error  << endl;
 }
 
+functionint init_vegas(std::string order, std::string power, std::string process, bool integrated){
+	functionint integrand;
+	
+	//if(integrand=="lumni"){ G.f = &vegas_sum_pdf_weigthed; ndim=1;}
+	//  if(integrand=="valence"){ G.f = &vegas_pdf_up_minus_upbar; ndim=1;}
+	//  if(integrand=="momcons"){ G.f = &vegas_pdf_mom_consv; ndim=1;}  
+	//  if(integrand=="sum_PDF"){ G.f =&vegas_sum_pdf; ndim=1;}
+	
+	if(order == "LO"){
+	    integrand.G.f =&vegas_LO; 
+	    integrand.G.dim=1;
+		integrand.xl = {tau}; 
+		integrand.xu = {1.};
+	}
+	else if (order == "NLO"){
+		if (process == "qqbar"){
+			if (integrated == false){
+				if (power == "LP"){
+					integrand.G.f =&vegas_sig_LP_1; 
+					integrand.G.dim = 2; 
+					integrand.xl = {tau,0.}; 
+					integrand.xu = {1.,1.};
+				}
+				else if (power == "LP_corr"){
+					integrand.G.f =&vegas_sig_LP_correction; 
+					integrand.G.dim = 2;
+					integrand.xl = {0.,0.}; 
+					integrand.xu = {tau,1.};
+				}
+				else if (power == "NLP"){
+					integrand.G.f =&vegas_sig_NLP; 
+					integrand.G.dim = 2;
+					integrand.xl = {tau,0.}; 
+					integrand.xu = {1.,1.};
+				}
+				else if (power == "NNLP"){
+					integrand.G.f =&vegas_sig_NNLP; 
+					integrand.G.dim = 2;
+					integrand.xl = {tau,0.}; 
+					integrand.xu = {1.,1.};
+				}
+				//else if (power == "NNNLP"){integrand.G.f =&vegas_NNLO_qqtogg_NNNLP; integrand.G.dim = 2;}
+				else if (power == "full"){
+					integrand.G.f =&vegas_sig_full; 
+					integrand.G.dim = 2;
+					integrand.xl = {tau,0.}; 
+					integrand.xu = {1.,1.};
+				}
+				else if (power == "delta"){
+					integrand.G.f =&vegas_sig_delta; 
+					integrand.G.dim = 1;
+					integrand.xl = {tau}; 
+					integrand.xu = {1.};
+					}
+				else{		
+					cout << process << " " << integrated << " " << order << " " << power << endl;	
+					cout << "Wrong order specified" << endl;
+					exit(0);
+				}
+			}
+			else{
+				if (power == "LP"){
+					integrand.G.f =&vegas_sig_LP_int; 
+					integrand.G.dim = 2;
+					integrand.xl = {tau,0.}; 
+					integrand.xu = {1.,1.};
+				}
+				else if (power == "NLP"){
+					integrand.G.f =&vegas_sig_NLP_int; 
+					integrand.G.dim = 2;
+					integrand.xl = {tau,0.}; 
+					integrand.xu = {1.,1.};
+				}
+				else if (power == "NNLP"){
+					integrand.G.f =&vegas_sig_NNLP_int; 
+					integrand.G.dim = 2;
+					integrand.xl = {tau,0.}; 
+					integrand.xu = {1.,1.};
+				}
+				else if (power == "full"){
+					integrand.G.f =&vegas_sig_full_int; 
+					integrand.G.dim = 2;
+					integrand.xl = {tau,0.}; 
+					integrand.xu = {1.,1.};
+				}
+				else{		
+					cout << process << " " << integrated << " " << order << " " << power << endl;	
+					cout << "Wrong order specified" << endl;
+					exit(0);
+				}
+			}
+		}
+		else if (process == "qg"){
+			if (integrated == false){
+				if (power == "full"){
+					integrand.G.f =&vegas_qg_full; 
+					integrand.G.dim = 2;
+					integrand.xl = {tau,0.}; 
+					integrand.xu = {1.,1.};
+				}
+				else{		
+					cout << process << " " << integrated << " " << order << " " << power << endl;	
+					cout << "Wrong order specified" << endl;
+					exit(0);
+				}
+			}
+			else{
+				if (power == "full"){
+					integrand.G.f =&vegas_qg_full_int; 
+					integrand.G.dim = 2;
+					integrand.xl = {tau,0.}; 
+					integrand.xu = {1.,1.};
+				}
+				else{		
+					cout << process << " " << integrated << " " << order << " " << power << endl;	
+					cout << "Wrong order specified" << endl;
+					exit(0);
+				}
+			}
+		}
+		
+		else{		
+			cout << process << " " << integrated << " " << order << " " << power << endl;	
+			cout << "Wrong order specified" << endl;
+			exit(0);
+		}
+	}
+	else if (order == "NNLO"){
+		if (process == "qqbar"){
+			if (power == "LP"){
+				integrand.G.f =&vegas_NNLO_qqtogg_LP; 
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.}; 
+				integrand.xu = {1.,1.};
+				}
+			else if (power == "LP_corr"){
+				integrand.G.f =&vegas_NNLO_qqtogg_LP_correction; 
+				integrand.G.dim = 2;
+				integrand.xl = {0,0.}; 
+				integrand.xu = {tau,1.};
+				}
+			else if (power == "NLP"){
+				integrand.G.f =&vegas_NNLO_qqtogg_NLP; 
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.}; 
+				integrand.xu = {1.,1.};
+				}
+			else if (power == "NNLP"){
+				integrand.G.f =&vegas_NNLO_qqtogg_NNLP; 
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.}; 
+				integrand.xu = {1.,1.};
+				}
+			else if (power == "NNNLP"){
+				integrand.G.f =&vegas_NNLO_qqtogg_NNNLP; 
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.}; 
+				integrand.xu = {1.,1.};
+				}
+			else if (power == "full"){
+				integrand.G.f =&vegas_NNLO_qqtogg_full; 
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.}; 
+				integrand.xu = {1.,1.};
+				}
+			else if (power == "delta"){
+				integrand.G.f =&vegas_NNLO_qqtogg_delta; 
+				integrand.G.dim = 1;
+				integrand.xl = {tau}; 
+				integrand.xu = {1.};
+				}
+			else{		
+				cout << process << " " << integrated << " " << order << " " << power << endl;	
+				cout << "Wrong order specified" << endl;
+				exit(0);
+			}
+		}
+	}
+	else{		
+		cout << process << " " << integrated << " " << order << " " << power << endl;	
+		cout << "Wrong order specified" << endl;
+		exit(0);
+	}
+	return integrand;
+}
+
 
 //////////////////////////////////////////////////////////
 /// call vegas, store the results in a result struc
 /// handles all the declaration
-/// input is the function to integrate
+/// input is the functionint to integrate
 /// the parameter structure (may change)
 /// the number of dimensions
 /// the upper and lower bounds of the integrand
 //////////////////////////////////////////////////////////
-results call_vegas(std::string integrand, double *xl, double *xu, lumni_params params, bool verbal, bool high_prec){
+results call_vegas(functionint integrand, /*gsl_monte_functionint G, double *xl, double *xu,*/ lumni_params params, bool verbal, bool high_prec){
 	  double res(0),err(0);
 	  int MAX_ITER = 10;
 	  const gsl_rng_type *T; 
-	  int ndim(0);
 	  gsl_rng *r; //the random number generator
 
-	  gsl_monte_function G;
-
-
-	  if(integrand=="lumni"){ G.f = &vegas_sum_pdf_weigthed; ndim=1;}
-	  if(integrand=="DYNLO"){ G.f = &vegas_k_NLO_dy_gg; ndim=1;}
-	  if(integrand=="valence"){ G.f = &vegas_pdf_up_minus_upbar; ndim=1;}
-	  if(integrand=="momcons"){ G.f = &vegas_pdf_mom_consv; ndim=1;}
-	  if(integrand=="LO"){ G.f =&vegas_LO; ndim=1;}
-	  if(integrand=="DY_NLO_LP1"){ G.f =&vegas_sig_LP_1; ndim=2;}
-	  if(integrand=="DY_NLO_LP_corr"){ G.f =&vegas_sig_LP_correction; ndim=2;}
-	  if(integrand=="DY_NNLO_LP"){ G.f =&vegas_NNLO_qqtogg_LP; ndim=2;}
-	  if(integrand=="DY_NNLO_LP_corr"){ G.f =&vegas_NNLO_qqtogg_LP_correction; ndim=2;}
-	  if(integrand=="DY_NLO_NLP"){ G.f =&vegas_sig_NLP; ndim=2;}
-	  if(integrand=="DY_NLO_NNLP"){ G.f =&vegas_sig_NNLP; ndim=2;}
-	  if(integrand=="DY_NNLO_NLP"){ G.f =&vegas_NNLO_qqtogg_NLP; ndim=2;}
-	  if(integrand=="DY_NNLO_NNLP"){ G.f =&vegas_NNLO_qqtogg_NNLP; ndim=2;}
-	  if(integrand=="DY_NNLO_NNNLP"){ G.f =&vegas_NNLO_qqtogg_NNNLP; ndim=2;}
-	  if(integrand=="DY_LO"){ G.f =&vegas_LO; ndim=1;}
-	  if(integrand=="DY_NLO_delta"){ G.f =&vegas_sig_delta; ndim=1;}
-	  if(integrand=="sum_PDF"){ G.f =&vegas_sum_pdf; ndim=1;}
-	  if(integrand=="DY_NNLO_delta"){ G.f =&vegas_NNLO_qqtogg_delta; ndim=1;}
-	  if(integrand=="DY_NLO_full"){ G.f =&vegas_sig_full; ndim=2;}
-	  if(integrand=="DY_NNLO_full"){ G.f =&vegas_NNLO_qqtogg_full; ndim=2;}
-	  if(integrand=="DY_NLO_qg_full"){ G.f =&vegas_qg_full; ndim=2;}
-	  if(integrand=="DY_NLO_LP_int"){ G.f =&vegas_sig_LP_int; ndim=2;}
-	  if(integrand=="DY_NNLO_LP_int"){ G.f =&vegas_NNLO_LP_int; ndim=2;}
-	  if(integrand=="DY_NLO_NLP_int"){ G.f =&vegas_sig_NLP_int; ndim=2;}
-	  if(integrand=="DY_NLO_NNLP_int"){ G.f =&vegas_sig_NNLP_int; ndim=2;}
-	  if(integrand=="DY_NLO_full_int"){ G.f =&vegas_sig_full_int; ndim=2;}
-	  if(integrand=="DY_NLO_qg_full_int"){ G.f =&vegas_qg_full_int; ndim=2;}
-	  if(integrand=="test1"){ G.f =&vegas_sig_testfunction1; ndim=1;}
-	  if(integrand=="test2"){ G.f =&vegas_sig_testfunction2; ndim=1;}
+		
 	  
-	  G.dim = ndim;
-	  G.params = &params;
+	  integrand.G.params = &params;
 	  size_t calls = 50000;
 	  gsl_rng_env_setup ();
 	  T = gsl_rng_default;
 	  r = gsl_rng_alloc (T);
 	  
 		  
-	  gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (ndim);
+	  gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (integrand.G.dim);
 	  int n_iter = 0;
 	 
 	  if(high_prec==true)
@@ -92,10 +245,11 @@ results call_vegas(std::string integrand, double *xl, double *xu, lumni_params p
 	  params_run->alpha = 2.0; 
 	  params_run->stage = 0;
 	  gsl_monte_vegas_params_set(s, params_run);
-	  gsl_monte_vegas_integrate (&G, xl, xu, ndim, calls/50, r, s, &res, &err);
+	  
+	  gsl_monte_vegas_integrate (&integrand.G, &integrand.xl[0], &integrand.xu[0], integrand.G.dim, calls/50, r, s, &res, &err);
 	  params_run->stage = 1;
 	  gsl_monte_vegas_params_set(s, params_run);
-	  gsl_monte_vegas_integrate (&G, xl, xu, ndim, calls, r, s, &res, &err);		 
+	  gsl_monte_vegas_integrate (&integrand.G, &integrand.xl[0], &integrand.xu[0], integrand.G.dim, calls, r, s, &res, &err);		 
 	  params_run->stage = 1;
 	  gsl_monte_vegas_params_set(s, params_run);	
 	  if(verbal){display_results ("vegas warm-up", res, err);}
@@ -104,7 +258,7 @@ results call_vegas(std::string integrand, double *xl, double *xu, lumni_params p
 			params_run->stage = 2;
 	        params_run->alpha = 1.5; 
 	        gsl_monte_vegas_params_set(s, params_run);	
-			gsl_monte_vegas_integrate (&G, xl, xu, ndim, calls, r, s, &res, &err);
+			gsl_monte_vegas_integrate (&integrand.G, &integrand.xl[0], &integrand.xu[0], integrand.G.dim, calls, r, s, &res, &err);
 			if(verbal){ cout << "round " << n_iter << ", result = " << res << " error = " << err << " chisq/dof = " << gsl_monte_vegas_chisq (s) << " err/res = " << err/res << endl;}
 			if(n_iter >= MAX_ITER){break;}
 		}
@@ -112,14 +266,14 @@ results call_vegas(std::string integrand, double *xl, double *xu, lumni_params p
 	  params_run->stage = 1;
 	  gsl_monte_vegas_params_set(s, params_run);	
 	  
-	  gsl_monte_vegas_integrate (&G, xl, xu, ndim, calls*10, r, s, &res, &err);
+	  gsl_monte_vegas_integrate (&integrand.G, &integrand.xl[0], &integrand.xu[0], integrand.G.dim, calls*10, r, s, &res, &err);
 	  
 	  params_run->stage = 3;
 	  gsl_monte_vegas_params_set(s, params_run);	
 	  n_iter = 0;
 	  do{ 
 			n_iter+=1;
-			gsl_monte_vegas_integrate (&G, xl, xu, ndim, calls/5, r, s, &res, &err);
+			gsl_monte_vegas_integrate (&integrand.G, &integrand.xl[0], &integrand.xu[0], integrand.G.dim, calls/5, r, s, &res, &err);
 			if(verbal){ cout << "round " << n_iter << ", result = " << res << " error = " << err << " chisq/dof = " << gsl_monte_vegas_chisq (s) << " err/res = " << err/res << endl;}
 			if(n_iter > 100){break;}
 		}
@@ -131,7 +285,7 @@ results call_vegas(std::string integrand, double *xl, double *xu, lumni_params p
 	 {
 		 do{ 
 			n_iter+=1;
-			gsl_monte_vegas_integrate (&G, xl, xu, ndim, calls/5, r, s, &res, &err);
+			gsl_monte_vegas_integrate (&integrand.G, &integrand.xl[0], &integrand.xu[0], integrand.G.dim, calls/5, r, s, &res, &err);
 			if(verbal){ cout << "round " << n_iter << ", result = " << res << " error = " << err << " chisq/dof = " << gsl_monte_vegas_chisq (s) << " err/res = " << err/res << endl;}
 			if(n_iter > 100){break;}
 	  }

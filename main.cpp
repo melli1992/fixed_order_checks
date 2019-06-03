@@ -65,112 +65,45 @@ int main(int argc, char* argv[]){
 	lumni_params params = {z, pdfs};
 	params.z = 0.5;
 
-	/*double xl[1] = {0.};
-	double xu[1] = {1.};
-	results testsig = call_vegas("test1", xl, xu, params);
+	/// LO
+	cout << "computing LO" << endl;
+	results LO_qqbar_full = call_vegas(init_vegas("LO"), params);
 	
-	cout << "Results test1 " << testsig.res << " " << testsig.err << endl;
-	params.z = 0.5+0.0001;
-	results testsigint1 = call_vegas("test2", xl, xu, params);
-	params.z = 0.5-0.0001;
-	results testsigint2 = call_vegas("test2", xl, xu, params);
-	
-	cout << "Results test2 " << (testsigint1.res-testsigint2.res)/(2*0.0001) << " " << testsigint1.err << endl;
-	double result = pow(tau-params.z,2.)*(tau+params.z)/(2.*pow(params.z,2.));
-	cout <<  result << endl;
-	double increment = (1.-tau)/100.;
-	*/
-	
-	
-	double xl1[2] = {tau,0.};
-	double xu1[2] = {1.,1.};
-	results testsig1 = call_vegas("DY_NNLO_LP", xl1, xu1, params);
-	xl1[0] = 0;
-	xu1[0] = tau;
-	results testsig2 = call_vegas("DY_NNLO_LP_corr", xl1, xu1, params);
-	double DtermsresNNLO = testsig1.res + testsig2.res;
-	double DtermserNNLO = testsig1.err + testsig2.err;
-	xl1[0] = tau;
-	xu1[0] = 1;
+	/// NLO
+	cout << "computing NLO qqbar" << endl;
+	results NLO_qqbar_hard = call_vegas(init_vegas("NLO"), params);
+	results NLO_qqbar_LP_part1 = call_vegas(init_vegas("NLO","LP"), params);
+	results NLO_qqbar_LP_cor = call_vegas(init_vegas("NLO","LP_corr"), params);
+	results NLO_qqbar_NLP = call_vegas(init_vegas("NLO","NLP"), params);
+	results NLO_qqbar_NNLP = call_vegas(init_vegas("NLO","NNLP"), params);
+	results NLO_qqbar_delta = call_vegas(init_vegas("NLO","delta"), params);
+	results NLO_qqbar_LP;
+	NLO_qqbar_LP.res = NLO_qqbar_LP_part1.res + NLO_qqbar_LP_cor.res;
+	NLO_qqbar_LP.err = NLO_qqbar_LP_part1.err + NLO_qqbar_LP_cor.err;
+	results NLO_qqbar_full;
+	NLO_qqbar_full.res = NLO_qqbar_LP.res + NLO_qqbar_delta.res + NLO_qqbar_hard.res;
+	NLO_qqbar_full.err = NLO_qqbar_LP.err + NLO_qqbar_delta.err + NLO_qqbar_hard.err;
 	
 	
+	/// NLO
+	cout << "computing NLO qg" << endl;
+	results NLO_qg_full = call_vegas(init_vegas("NLO","full","qg"), params);
 	
-	double xl[1] = {tau};
-	double xu[1] = {1.};
-	testsig1 = call_vegas("DY_LO", xl, xu, params);
-	double resLO = testsig1.res;
-	double erLO = testsig1.err;
-	cout << resLO << endl;
-	cout << erLO << endl;
-	testsig1 = call_vegas("sum_PDF", xl, xu, params);
-	double resPDF = testsig1.res;
-	double erPDF = testsig1.err;
-	cout << resPDF << " " << erPDF << endl;
-	testsig1 = call_vegas("DY_NNLO_NLP", xl1, xu1, params);
-	double NNLO_NLP = testsig1.res;
-	double NNLO_NLPer = testsig1.err;
-	testsig1 = call_vegas("DY_NNLO_NNLP", xl1, xu1, params);
-	double NNLO_NNLP = testsig1.res;
-	double NNLO_NNLPer = testsig1.err;
-	testsig1 = call_vegas("DY_NNLO_NNNLP", xl1, xu1, params);
-	double NNLO_NNNLP = testsig1.res;
-	double NNLO_NNNLPer = testsig1.err;
-	testsig1 = call_vegas("DY_NNLO_full", xl1, xu1, params);
-	double NNLO_Ltermsres = testsig1.res;
-	double NNLO_Ltermser = testsig1.err;
-	testsig1 = call_vegas("DY_NNLO_delta", xl, xu, params);
-	double NNLO_delta = testsig1.res;
-	double NNLO_deltaer = testsig1.err;
-	
-	
-	testsig1 = call_vegas("DY_NLO_LP1", xl1, xu1, params);
-	xl1[0] = 0;
-	xu1[0] = tau;
-	testsig2 = call_vegas("DY_NLO_LP_corr", xl1, xu1, params);
-	double Dtermsres = testsig1.res + testsig2.res;
-	double Dtermser = testsig1.err + testsig2.err;
-	xl1[0] = tau;
-	xu1[0] = 1;
-	testsig1 = call_vegas("DY_NLO_NLP", xl1, xu1, params);
-	double NLP = testsig1.res;
-	double NLPer = testsig1.err;
-	testsig1 = call_vegas("DY_NLO_NNLP", xl1, xu1, params);
-	double NNLP = testsig1.res;
-	double NNLPer = testsig1.err;
-	testsig1 = call_vegas("DY_NLO_full", xl1, xu1, params);
-	double Ltermsres = testsig1.res;
-	double Ltermser = testsig1.err;
-	testsig1 = call_vegas("DY_NLO_qg_full", xl1, xu1, params);
-	double qgfullres = testsig1.res;
-	double qgfuller = testsig1.err;
-	
-	xl1[0] = tau;
-	xu1[0] = 1;
-	testsig1 = call_vegas("DY_NLO_LP_int", xl1, xu1, params);
-	double LPint = testsig1.res;
-	double LPerint = testsig1.err;
-	testsig1 = call_vegas("DY_NNLO_LP_int", xl1, xu1, params);
-	double NNLO_LPint = testsig1.res;
-	double NNLO_LPerint = testsig1.err;
-	testsig1 = call_vegas("DY_NLO_NLP_int", xl1, xu1, params);
-	double NLPint = testsig1.res;
-	double NLPerint = testsig1.err;
-	testsig1 = call_vegas("DY_NLO_NNLP_int", xl1, xu1, params);
-	double NNLPint = testsig1.res;
-	double NNLPerint = testsig1.err;
-	testsig1 = call_vegas("DY_NLO_full_int", xl1, xu1, params);
-	double fullresint = testsig1.res;
-	double fullerint = testsig1.err;
-	testsig1 = call_vegas("DY_NLO_qg_full_int", xl1, xu1, params);
-	double qgfullresint = testsig1.res;
-	double qgfullerint = testsig1.err;
-	testsig1 = call_vegas("DY_NLO_delta", xl, xu, params);
-	double zdelta = testsig1.res;
-	double deltaer = testsig1.err;
-	//testsig1 = call_vegas("LO", xl, xu, params);
-	//double LO = testsig1.res;
-	//double LOer = testsig1.err;
-	
+	/// NNLO
+	cout << "computing NNLO qqbar" << endl;
+	results NNLO_qqbar_hard = call_vegas(init_vegas("NNLO"), params);
+	results NNLO_qqbar_LP_part1 = call_vegas(init_vegas("NNLO","LP"), params);
+	results NNLO_qqbar_LP_cor = call_vegas(init_vegas("NNLO","LP_corr"), params);
+	results NNLO_qqbar_NLP = call_vegas(init_vegas("NNLO","NLP"), params);
+	results NNLO_qqbar_NNLP = call_vegas(init_vegas("NNLO","NNLP"), params);
+	results NNLO_qqbar_NNNLP = call_vegas(init_vegas("NNLO","NNNLP"), params);
+	results NNLO_qqbar_delta = call_vegas(init_vegas("NNLO","delta"), params);
+	results NNLO_qqbar_LP;
+	NNLO_qqbar_LP.res = NNLO_qqbar_LP_part1.res + NNLO_qqbar_LP_cor.res;
+	NNLO_qqbar_LP.err = NNLO_qqbar_LP_part1.err + NNLO_qqbar_LP_cor.err;
+	results NNLO_qqbar_full;
+	NNLO_qqbar_full.res = NNLO_qqbar_LP.res + NNLO_qqbar_delta.res + NNLO_qqbar_hard.res;
+	NNLO_qqbar_full.err = NNLO_qqbar_LP.err + NNLO_qqbar_delta.err + NNLO_qqbar_hard.err;
 	
 	
 	cout << "===========================================================================" << endl;
@@ -179,61 +112,54 @@ int main(int argc, char* argv[]){
     
     cout << endl << "INPUT PARAMETERS" << endl ;
     cout << "..........................................................................." << endl;
-    cout << "S = " << S2 << " GeV^2" << endl<< "Q = " << Q << " GeV" << endl << "tau = " << tau << endl << "tau*sigma_0 = "<< LO_factor() << endl;
-    
+    cout << "sqrt[S] = " << S << " GeV" << endl<< "Q = " << Q << " GeV" << endl << "tau = " << tau << endl << "tau*sigma_0 = "<< LO_factor() << endl;
+    cout << "alphas_Q " << alphas_Q << endl;
+	cout << "alphas_muF " << alphas_muF << endl;
+	cout << "alphas_muR " << alphas_muR << endl;
+	
     cout << "---------------------------------------------------------------------------" << endl;
     
     cout << endl << "RESULTS" << endl;
     
     cout << "..........................................................................." << endl;
-    cout << endl << "Total direct integration (LO): " << resLO << " pb/GeV^2 (" << erLO << ")" << endl;
-    cout << endl << "Total direct integration (NLO): " << Dtermsres+Ltermsres+zdelta << " pb/GeV^2 (" << Dtermser+Ltermser+deltaer << ")" << endl;
-    cout << endl << "Total direct integration (NNLO): " << DtermsresNNLO+NNLO_Ltermsres+NNLO_delta << " pb/GeV^2 (" << DtermserNNLO+NNLO_Ltermser+NNLO_deltaer << ")" << endl;
+    cout << "Total direct integration (LO): " << LO_qqbar_full.res << " pb/GeV^2 (" <<  LO_qqbar_full.err << ")" << endl;
+    cout << "Total direct integration (NLO, qqbar): " << NLO_qqbar_full.res << " pb/GeV^2 (" << NLO_qqbar_full.err << ")" << endl;
+    cout << "Total direct integration (NLO, qg): " << NLO_qg_full.res << " pb/GeV^2 (" << NLO_qg_full.err << ")" << endl;
+    cout << "Total direct integration (NNLO): " << NNLO_qqbar_full.res << " pb/GeV^2 (" << NNLO_qqbar_full.err << ")" << endl;
     cout << "---------------------------------------------------------------------------" << endl;
 
     
     cout << endl << "POWER EXPANSION (NLO)" << endl;
     cout << "..........................................................................." << endl;
-    cout << "LP         : " << Dtermsres  << " pb/GeV^2 (" << Dtermser  << ")"  << endl;
-    cout << "LP (+delta): " << Dtermsres + zdelta << " pb/GeV^2 (" << Dtermser + deltaer << ")"  << "  ; fractional: "<<(Dtermsres + zdelta)/(Dtermsres+Ltermsres+zdelta) << endl;
-    
-    cout << "NLP        : " << NLP << " pb/GeV^2 (" << NLPer << ")"  << "  ; fractional: "<<(NLP)/(Dtermsres+Ltermsres+zdelta) << endl;
-    cout << "NNLP       : " << NNLP << " pb/GeV^2 (" << NNLPer << ")"  << " ; fractional: "<<(NNLP)/(Dtermsres+Ltermsres+zdelta) << endl;
-    cout << "qg         : " << qgfullres << " pb/GeV^2 (" << qgfuller << ")"  << endl;
-     cout << endl << "Integrated (NLO)" << endl;
-    cout << "LP         : " << LPint  << " pb/GeV^2 (" << LPerint  << ")"  << endl;
-    cout << "LP (+delta): " << LPint + zdelta << " pb/GeV^2 (" << LPerint + deltaer << ")"  << "  ; fractional: "<<(LPint + zdelta)/(fullresint+zdelta) << endl;
-    cout << "NLP        : " << NLPint << " pb/GeV^2 (" << NLPerint << ")"  << "  ; fractional: "<<(NLPint)/(fullresint+zdelta) << endl;
-    cout << "NNLP       : " << NNLPint << " pb/GeV^2 (" << NNLPerint << ")"  << " ; fractional: "<<(NNLPint)/(fullresint+zdelta) << endl;
-    cout << "qg         : " << qgfullresint << " pb/GeV^2 (" << qgfullerint << ")"  << endl;
-    
+    cout << "LP         : " << NLO_qqbar_LP.res  << " pb/GeV^2 (" << NLO_qqbar_LP.err  << ")"  << endl;
+    cout << "LP (+delta): " << NLO_qqbar_LP.res + NLO_qqbar_delta.res << " pb/GeV^2 (" << NLO_qqbar_LP.err + NLO_qqbar_delta.err << ")"  << "  ; fractional: "<<(NLO_qqbar_LP.res + NLO_qqbar_delta.res)/(NLO_qqbar_full.res) << endl;
+    cout << "NLP        : " << NLO_qqbar_NLP.res << " pb/GeV^2 (" << NLO_qqbar_NLP.err << ")"  << "  ; fractional: "<<(NLO_qqbar_NLP.res)/(NLO_qqbar_full.res) << endl;
+    cout << "NNLP       : " << NLO_qqbar_NNLP.res << " pb/GeV^2 (" << NLO_qqbar_NNLP.err << ")"  << " ; fractional: "<<(NLO_qqbar_NNLP.res)/(NLO_qqbar_full.res) << endl;
+   
 	cout << endl << "CUMULATIVE" << endl;
     cout << "..........................................................................." << endl;
-    cout << "LP  : " << Dtermsres + zdelta  << " pb/GeV^2 " << " ; fractional: "<<(Dtermsres + zdelta)/(Dtermsres+Ltermsres+zdelta) << endl;
-    cout << "NLP : " << NLP + Dtermsres + zdelta << " pb/GeV^2 " << " ; fractional: "<<(NLP + Dtermsres + zdelta)/(Dtermsres+Ltermsres+zdelta) << endl;
-    cout << "NNLP: " << NNLP + NLP + Dtermsres + zdelta << " pb/GeV^2 " << " ; fractional: "<<(NNLP + NLP + Dtermsres + zdelta)/(Dtermsres+Ltermsres+zdelta) << endl;
+    cout << "LP : " << NLO_qqbar_LP.res  << " pb/GeV^2 " << " ; fractional: "<<(NLO_qqbar_LP.res)/(NLO_qqbar_full.res)<< endl;
+    cout << "LP + delta : " << NLO_qqbar_LP.res + NLO_qqbar_delta.res  << " pb/GeV^2 " << " ; fractional: "<<(NLO_qqbar_LP.res + NLO_qqbar_delta.res)/(NLO_qqbar_full.res)<< endl;
+    cout << "LP + NLP + delta : " << NLO_qqbar_NLP.res+NLO_qqbar_LP.res + NLO_qqbar_delta.res << " pb/GeV^2 " << " ; fractional: "<<(NLO_qqbar_NLP.res+NLO_qqbar_LP.res + NLO_qqbar_delta.res )/(NLO_qqbar_full.res) << endl;
+    cout << "LP + NLP + NNLP + delta: " << NLO_qqbar_NNLP.res+NLO_qqbar_NLP.res+NLO_qqbar_LP.res + NLO_qqbar_delta.res << " pb/GeV^2 " << " ; fractional: "<<(NLO_qqbar_NNLP.res+NLO_qqbar_NLP.res+NLO_qqbar_LP.res + NLO_qqbar_delta.res )/(NLO_qqbar_full.res) << endl;
     cout << "---------------------------------------------------------------------------" << endl;
     
 	cout << endl << "POWER EXPANSION (NNLO)" << endl;
-	cout << "..........................................................................." << endl;
-    cout << "LP         : " << DtermsresNNLO  << " pb/GeV^2 (" << DtermserNNLO  << ")"  << endl;
-    cout << "LP (+delta): " << DtermsresNNLO + NNLO_delta << " pb/GeV^2 (" << DtermserNNLO + NNLO_deltaer << ")"  << "  ; fractional: "<<(DtermsresNNLO + NNLO_delta)/(DtermsresNNLO+NNLO_Ltermsres+NNLO_delta) << endl;
-    
-    cout << "NLP        : " << NNLO_NLP << " pb/GeV^2 (" << NNLO_NLPer << ")"  << "  ; fractional: "<<(NNLO_NLP)/(DtermsresNNLO+NNLO_Ltermsres+NNLO_delta) << endl;
-    cout << "NNLP       : " << NNLO_NNLP << " pb/GeV^2 (" << NNLO_NNLPer << ")"  << " ; fractional: "<<(NNLO_NNLP)/(DtermsresNNLO+NNLO_Ltermsres+NNLO_delta) << endl;
-    cout << "NNNLP       : " << NNLO_NNNLP << " pb/GeV^2 (" << NNLO_NNNLPer << ")"  << " ; fractional: "<<(NNLO_NNNLP)/(DtermsresNNLO+NNLO_Ltermsres+NNLO_delta) << endl;
-    cout << endl << "Integrated (NNLO)" << endl;
-    cout << "LP         : " << NNLO_LPint  << " pb/GeV^2 (" << NNLO_LPerint  << ")"  << endl;
-    cout << "LP (+delta): " << NNLO_LPint + NNLO_delta << " pb/GeV^2 (" << NNLO_LPerint + NNLO_deltaer << ")"  << "  ; fractional: "<<(NNLO_LPint + NNLO_delta)/(DtermsresNNLO+NNLO_Ltermsres+NNLO_delta) << endl;
-   
-    cout << endl << "CUMULATIVE (NNLO)" << endl;
     cout << "..........................................................................." << endl;
-    cout << "LP  : " << DtermsresNNLO + NNLO_delta  << " pb/GeV^2 " << " ; fractional: "<<(DtermsresNNLO + NNLO_delta)/(DtermsresNNLO+NNLO_Ltermsres+NNLO_delta) << endl;
-    cout << "NLP : " << NNLO_NLP + DtermsresNNLO + NNLO_delta << " pb/GeV^2 " << " ; fractional: "<<(NNLO_NLP + DtermsresNNLO + NNLO_delta)/(DtermsresNNLO+NNLO_Ltermsres+NNLO_delta) << endl;
-    cout << "NNLP: " << NNLO_NNLP + NNLO_NLP + DtermsresNNLO + NNLO_delta << " pb/GeV^2 " << " ; fractional: "<<(NNLO_NNLP + NNLO_NLP + DtermsresNNLO + NNLO_delta)/(DtermsresNNLO+NNLO_Ltermsres+NNLO_delta) << endl;
-    cout << "NNNLP: " << NNLO_NNNLP + NNLO_NNLP + NNLO_NLP + DtermsresNNLO + NNLO_delta << " pb/GeV^2 " << " ; fractional: "<<(NNLO_NNNLP +NNLO_NNLP + NNLO_NLP + DtermsresNNLO + NNLO_delta)/(DtermsresNNLO+NNLO_Ltermsres+NNLO_delta) << endl;
+    cout << "LP         : " << NNLO_qqbar_LP.res  << " pb/GeV^2 (" << NNLO_qqbar_LP.err  << ")"  << endl;
+    cout << "LP (+delta): " << NNLO_qqbar_LP.res + NNLO_qqbar_delta.res << " pb/GeV^2 (" << NNLO_qqbar_LP.err + NNLO_qqbar_delta.err << ")"  << "  ; fractional: "<<(NNLO_qqbar_LP.res + NNLO_qqbar_delta.res)/(NNLO_qqbar_full.res) << endl;
+    cout << "NLP        : " << NNLO_qqbar_NLP.res << " pb/GeV^2 (" << NNLO_qqbar_NLP.err << ")"  << "  ; fractional: "<<(NNLO_qqbar_NLP.res)/(NNLO_qqbar_full.res) << endl;
+    cout << "NNLP       : " << NNLO_qqbar_NNLP.res << " pb/GeV^2 (" << NNLO_qqbar_NNLP.err << ")"  << " ; fractional: "<<(NNLO_qqbar_NNLP.res)/(NNLO_qqbar_full.res) << endl;
+    cout << "NNLP       : " << NNLO_qqbar_NNNLP.res << " pb/GeV^2 (" << NNLO_qqbar_NNNLP.err << ")"  << " ; fractional: "<<(NNLO_qqbar_NNNLP.res)/(NNLO_qqbar_full.res) << endl;
+   
+	cout << endl << "CUMULATIVE" << endl;
+    cout << "..........................................................................." << endl;
+    cout << "LP : " << NNLO_qqbar_LP.res  << " pb/GeV^2 " << " ; fractional: "<<(NNLO_qqbar_LP.res)/(NNLO_qqbar_full.res)<< endl;
+    cout << "LP + delta : " << NNLO_qqbar_LP.res + NNLO_qqbar_delta.res  << " pb/GeV^2 " << " ; fractional: "<<(NNLO_qqbar_LP.res + NNLO_qqbar_delta.res)/(NNLO_qqbar_full.res)<< endl;
+    cout << "LP + NLP + delta : " << NNLO_qqbar_NLP.res+NNLO_qqbar_LP.res + NNLO_qqbar_delta.res << " pb/GeV^2 " << " ; fractional: "<<(NNLO_qqbar_NLP.res+NNLO_qqbar_LP.res + NNLO_qqbar_delta.res )/(NNLO_qqbar_full.res) << endl;
+    cout << "LP + NLP + NNLP + delta: " << NNLO_qqbar_NNLP.res+NNLO_qqbar_NLP.res+NNLO_qqbar_LP.res + NNLO_qqbar_delta.res << " pb/GeV^2 " << " ; fractional: "<<(NNLO_qqbar_NNLP.res+NNLO_qqbar_NLP.res+NNLO_qqbar_LP.res + NNLO_qqbar_delta.res )/(NNLO_qqbar_full.res) << endl;
+    cout << "LP + NLP + NNLP + NNNLP + delta: " << NNLO_qqbar_NNNLP.res+NNLO_qqbar_NNLP.res+NNLO_qqbar_NLP.res+NNLO_qqbar_LP.res + NNLO_qqbar_delta.res << " pb/GeV^2 " << " ; fractional: "<<(NNLO_qqbar_NNNLP.res+NNLO_qqbar_NNLP.res+NNLO_qqbar_NLP.res+NNLO_qqbar_LP.res + NNLO_qqbar_delta.res )/(NNLO_qqbar_full.res) << endl;
     cout << "---------------------------------------------------------------------------" << endl;
-
     
     
 
