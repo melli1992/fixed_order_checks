@@ -24,7 +24,7 @@ using namespace std;
 /// int[1/x*f_1(x,Q)*f_2(tau/(z*x),Q),{x,tau/z,1}]
 /////////////////////////////////////////////////////////////////////////
 
-double pdf_sum_qq_charge_weighted(double x, double tau_over_z){
+double pdf_sum_qqbar_charge_weighted(double x, double tau_over_z){
 	double sum_pdf(0);
 	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
 	if(x < tau_over_z){return 0;}
@@ -35,6 +35,99 @@ double pdf_sum_qq_charge_weighted(double x, double tau_over_z){
 	return 1./x*sum_pdf;
 }
 
+
+
+/////////////////////////////////////////////////////////////////////////
+/// this is the qqbar sum with normal x and tau/z inputs for the integral
+/// int[1/x*f_1(x,Q)*f_2(tau/(z*x),Q),{x,tau/z,1}]
+/////////////////////////////////////////////////////////////////////////
+
+double pdf_sum_qq_charge_weighted(double x, double tau_over_z){
+	double sum_pdf(0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
+	if(x < tau_over_z){return 0;}
+	for(int i = 1; i <=5; i++){
+		sum_pdf+= eq[i-1]*eq[i-1]*1./x*1./(tau_over_z/x)*(pdfs[0]->xfxQ(i,x,muF)*pdfs[0]->xfxQ(i,tau_over_z/x,muF)+pdfs[0]->xfxQ(i,tau_over_z/x,muF)*pdfs[0]->xfxQ(i,x,muF));
+		//cout << "in the sum " << sum_pdf << endl;
+	}
+	return 1./x*sum_pdf;
+}
+
+
+
+
+/////////////////////////////////////////////////////////////////////////
+/// this is the qqbar sum with normal x and tau/z inputs for the integral
+/// int[1/x*f_1(x,Q)*f_2(tau/(z*x),Q),{x,tau/z,1}]
+/////////////////////////////////////////////////////////////////////////
+
+double pdf_sum_qbarqbar_charge_weighted(double x, double tau_over_z){
+	double sum_pdf(0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
+	if(x < tau_over_z){return 0;}
+	for(int i = 1; i <=5; i++){
+		sum_pdf+= eq[i-1]*eq[i-1]*1./x*1./(tau_over_z/x)*(pdfs[0]->xfxQ(-i,x,muF)*pdfs[0]->xfxQ(-i,tau_over_z/x,muF)+pdfs[0]->xfxQ(-i,tau_over_z/x,muF)*pdfs[0]->xfxQ(-i,x,muF));
+		//cout << "in the sum " << sum_pdf << endl;
+	}
+	return 1./x*sum_pdf;
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+/// this is the NI qqbar sum with normal x and tau/z inputs for the integral
+/// int[1/x*f_1(x,Q)*f_2(tau/(z*x),Q),{x,tau/z,1}] (non identical!)
+/////////////////////////////////////////////////////////////////////////
+
+double pdf_sum_qqbarNI_charge_weighted(double x, double tau_over_z){
+	double sum_pdf(0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
+	if(x < tau_over_z){return 0;}
+	for(int i = 1; i <=5; i++){
+		for(int j = 1; j <=5; j++){
+			if(i==j){continue;}
+			sum_pdf+= eq[i-1]*eq[j-1]*1./x*1./(tau_over_z/x)*(pdfs[0]->xfxQ(i,x,muF)*pdfs[0]->xfxQ(-j,tau_over_z/x,muF)+pdfs[0]->xfxQ(i,tau_over_z/x,muF)*pdfs[0]->xfxQ(-j,x,muF));
+		//cout << "in the sum " << sum_pdf << endl;
+	}}
+	return 1./x*sum_pdf;
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+/// this is the NI qq sum with normal x and tau/z inputs for the integral
+/// int[1/x*f_1(x,Q)*f_2(tau/(z*x),Q),{x,tau/z,1}] (non identical!)
+/////////////////////////////////////////////////////////////////////////
+
+double pdf_sum_qqNI_charge_weighted(double x, double tau_over_z){
+	double sum_pdf(0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
+	if(x < tau_over_z){return 0;}
+	for(int i = 1; i <=5; i++){
+		for(int j = 1; j <=5; j++){
+			if(i>=j){continue;} //to avoid double counting!
+			sum_pdf+= eq[i-1]*eq[j-1]*1./x*1./(tau_over_z/x)*(pdfs[0]->xfxQ(i,x,muF)*pdfs[0]->xfxQ(j,tau_over_z/x,muF)+pdfs[0]->xfxQ(i,tau_over_z/x,muF)*pdfs[0]->xfxQ(j,x,muF));
+		//cout << "in the sum " << sum_pdf << endl;
+	}}
+	return 1./x*sum_pdf;
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+/// this is the NI qbarqbar sum with normal x and tau/z inputs for the integral
+/// int[1/x*f_1(x,Q)*f_2(tau/(z*x),Q),{x,tau/z,1}] (non identical!)
+/////////////////////////////////////////////////////////////////////////
+
+double pdf_sum_qbarqbarNI_charge_weighted(double x, double tau_over_z){
+	double sum_pdf(0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
+	if(x < tau_over_z){return 0;}
+	for(int i = 1; i <=5; i++){
+		for(int j = 1; j <=5; j++){
+			if(i>=j){continue;} //to avoid double counting!
+			sum_pdf+= eq[i-1]*eq[j-1]*1./x*1./(tau_over_z/x)*(pdfs[0]->xfxQ(-i,x,muF)*pdfs[0]->xfxQ(-j,tau_over_z/x,muF)+pdfs[0]->xfxQ(-i,tau_over_z/x,muF)*pdfs[0]->xfxQ(-j,x,muF));
+		//cout << "in the sum " << sum_pdf << endl;
+	}}
+	return 1./x*sum_pdf;
+}
 
 /////////////////////////////////////////////////////////////////////////
 /// this is the qg sum with normal x and tau/z inputs for the integral
@@ -51,6 +144,66 @@ double pdf_sum_qg_charge_weighted(double x, double tau_over_z){
 	}
 	return 1./x*sum_pdf;
 }
+
+
+/////////////////////////////////////////////////////////////////////////
+/// this is the gg sum with normal x and tau/z inputs for the integral
+/// int[1/x*f_1(x,Q)*f_2(tau/(z*x),Q),{x,tau/z,1}]
+/////////////////////////////////////////////////////////////////////////
+
+double pdf_sum_gg_charge_weighted(double x, double tau_over_z){
+	double sum_pdf(0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
+	double charge_factor = 0;
+	if(x < tau_over_z){return 0;}
+	for(int i = 1; i <=5; i++){
+		charge_factor += eq[i-1]*eq[i-1]; //still need the charge factor
+			}
+	sum_pdf = 1./x*1./(tau_over_z/x)*(pdfs[0]->xfxQ(0,x,muF)*pdfs[0]->xfxQ(0,tau_over_z/x,muF));
+	return 1./x*sum_pdf*charge_factor;
+}
+
+
+///////////////////////////////////////
+/// HIGGS STUFF
+//////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+/// this is the qqbar sum with normal x and tau/z inputs for the integral
+/// int[1/x*f_1(x,Q)*f_2(tau/(z*x),Q),{x,tau/z,1}]
+/////////////////////////////////////////////////////////////////////////
+double pdf_sum_qqbar(double x, double tau_over_z){
+	double sum_pdf(0);
+	if(x < tau_over_z){return 0;}
+	for(int i = 1; i <=5; i++){
+		sum_pdf+= 1./x*1./(tau_over_z/x)*(pdfs[0]->xfxQ(i,x,muF)*pdfs[0]->xfxQ(-i,tau_over_z/x,muF)+pdfs[0]->xfxQ(i,tau_over_z/x,muF)*pdfs[0]->xfxQ(-i,x,muF));
+		//cout << "in the sum " << sum_pdf << endl;
+	}
+	return 1./x*sum_pdf;
+}
+/////////////////////////////////////////////////////////////////////////
+/// this is the qg sum with normal x and tau/z inputs for the integral
+/// int[1/x*f_1(x,Q)*f_2(tau/(z*x),Q),{x,tau/z,1}]
+/////////////////////////////////////////////////////////////////////////
+double pdf_sum_qg(double x, double tau_over_z){
+	double sum_pdf(0);
+	if(x < tau_over_z){return 0;}
+	for(int i = 1; i <=5; i++){
+		sum_pdf+= 1./x*1./(tau_over_z/x)*(pdfs[0]->xfxQ(i,x,muF)*pdfs[0]->xfxQ(0,tau_over_z/x,muF)+pdfs[0]->xfxQ(i,tau_over_z/x,muF)*pdfs[0]->xfxQ(0,x,muF));
+		sum_pdf+= 1./x*1./(tau_over_z/x)*(pdfs[0]->xfxQ(-i,x,muF)*pdfs[0]->xfxQ(0,tau_over_z/x,muF)+pdfs[0]->xfxQ(-i,tau_over_z/x,muF)*pdfs[0]->xfxQ(0,x,muF));
+	}
+	return 1./x*sum_pdf;
+}
+/////////////////////////////////////////////////////////////////////////
+/// this is the gg sum with normal x and tau/z inputs for the integral
+/// int[1/x*f_1(x,Q)*f_2(tau/(z*x),Q),{x,tau/z,1}]
+/////////////////////////////////////////////////////////////////////////
+double pdf_sum_gg(double x, double tau_over_z){
+	double sum_pdf(0);
+	if(x < tau_over_z){return 0;}
+	sum_pdf = 1./x*1./(tau_over_z/x)*(pdfs[0]->xfxQ(0,x,muF)*pdfs[0]->xfxQ(0,tau_over_z/x,muF));
+	return 1./x*sum_pdf;
+}
+
 
 ///////////////////////////////////////////////////////
 /// numerical derivative of the weighted pdf sum for qq

@@ -26,6 +26,7 @@ extern double alphas_muF;
 extern double alphas_muR;
 extern double alphas_Q;
 extern double alphaEM;
+extern double GF;
 extern double nF;
 extern double zeta2;
 extern double zeta3;

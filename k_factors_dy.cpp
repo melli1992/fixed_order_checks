@@ -5,6 +5,7 @@
 #include <gsl/gsl_sf_dilog.h>
 #include "parameters.h"
 #include "deriv_pdf.h"
+#include "k_factors_dy.h"
 using namespace std;
 
 //////////////////////////////////////////////////////////
@@ -133,7 +134,7 @@ double vegas_sig_LP_1(double *k, size_t dim, void *params){
 	double z = k[0];
 	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
 	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*16.*log(1.-z)/(1.-z)*(jacobian*pdf_sum_qq_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z - (1.-tau)*pdf_sum_qq_charge_weighted(tau+k[1]*(1.-tau),tau));
+	return LO_factor()*alphas_Q/(4*M_PI)*CF*16.*log(1.-z)/(1.-z)*(jacobian*pdf_sum_qqbar_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z - (1.-tau)*pdf_sum_qqbar_charge_weighted(tau+k[1]*(1.-tau),tau));
 }
 //////////////////////////////////////////////////////////////
 /// correction term stemming from not integrating from 0 to 1
@@ -144,7 +145,7 @@ double vegas_sig_LP_correction(double *k, size_t dim, void *params){
 	double z = k[0]; // from 0 to tau
 	double jacobian = 1.-tau; //needed to transform the boundary dependent terms
 	double x = tau+k[1]*jacobian;
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*16.*log(1.-z)/(1.-z)*jacobian*(-pdf_sum_qq_charge_weighted(x,tau));
+	return LO_factor()*alphas_Q/(4*M_PI)*CF*16.*log(1.-z)/(1.-z)*jacobian*(-pdf_sum_qqbar_charge_weighted(x,tau));
 	
 	//return log(1.-z)/(1.-z)*jacobian*(x*(z-tau) - x*(1.-tau)); // test function
 }
@@ -158,7 +159,7 @@ double vegas_sig_NLP(double *k, size_t dim, void *params){
 	double z = k[0];
 	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
 	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*(8.-16.*log(1-z)-8.*log(Q2/muF2))*(jacobian*pdf_sum_qq_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
+	return LO_factor()*alphas_Q/(4*M_PI)*CF*(8.-16.*log(1-z)-8.*log(Q2/muF2))*(jacobian*pdf_sum_qqbar_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
 }
 
 
@@ -171,7 +172,7 @@ double vegas_sig_NNLP(double *k, size_t dim, void *params){
 	double z = k[0];
 	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
 	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*((-4.+8.*log(1-z)+4.*log(Q2/muF2))*(1-z))*(jacobian*pdf_sum_qq_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
+	return LO_factor()*alphas_Q/(4*M_PI)*CF*((-4.+8.*log(1-z)+4.*log(Q2/muF2))*(1-z))*(jacobian*pdf_sum_qqbar_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
 }
 
 
@@ -185,7 +186,7 @@ double vegas_LO(double *k, size_t dim, void *params){
 	(void)(params);
 	double jacobian = 1.;//-tau; //needed to transform the boundary dependent terms
 	double x = /*tau+*/k[0]*jacobian;
-	return LO_factor()*(1.)*(jacobian*pdf_sum_qq_charge_weighted(/*tau+*/k[0]*jacobian,tau));
+	return LO_factor()*(1.)*(jacobian*pdf_sum_qqbar_charge_weighted(/*tau+*/k[0]*jacobian,tau));
 }
 
 
@@ -200,7 +201,7 @@ double vegas_sig_delta(double *k, size_t dim, void *params){
 	(void)(params);
 	double jacobian = 1.;//-tau; //needed to transform the boundary dependent terms
 	double x = /*tau+*/k[0]*jacobian;
-	return LO_factor()*((alphas_Q/(4.*M_PI)*CF*(8.*zeta2 - 16.)))*(jacobian*pdf_sum_qq_charge_weighted(/*tau+*/k[0]*jacobian,tau));
+	return LO_factor()*((alphas_Q/(4.*M_PI)*CF*(8.*zeta2 - 16.)))*(jacobian*pdf_sum_qqbar_charge_weighted(/*tau+*/k[0]*jacobian,tau));
 }
 
 
@@ -210,7 +211,7 @@ double vegas_sum_pdf(double *k, size_t dim, void *params){
 	(void)(params);
 	double jacobian = 1.;//-tau; //needed to transform the boundary dependent terms
 	double x = /*tau+*/k[0]*jacobian;
-	return (jacobian*pdf_sum_qq_charge_weighted(/*tau+*/k[0]*jacobian,tau));
+	return (jacobian*pdf_sum_qqbar_charge_weighted(/*tau+*/k[0]*jacobian,tau));
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -222,7 +223,7 @@ double vegas_sig_full(double *k, size_t dim, void *params){
 	double z = k[0];
 	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
 	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*(-8.*(1.+z)*log(1.-z)-4.*(1.+pow(z,2))/(1.-z)*log(z))*(jacobian*pdf_sum_qq_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
+	return LO_factor()*alphas_Q/(4*M_PI)*CF*(-8.*(1.+z)*log(1.-z)-4.*(1.+pow(z,2))/(1.-z)*log(z))*(jacobian*pdf_sum_qqbar_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
 }
 
 double vegas_sig_LP_int(double *k, size_t dim, void *params){
@@ -274,24 +275,58 @@ double vegas_qg_full(double *k, size_t dim, void *params){
 	return LO_factor()*alphas_Q/(4*M_PI)*TF*(2.*(1.+2.*pow(z,2)-2.*z)*(log(pow(1.-z,2))-log(z)+log(Q2/muF2))+1.-7.*pow(z,2)+6.*z)*(jacobian*pdf_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
 }
 
-double vegas_sig_testfunction1(double *k, size_t dim, void *params){
+
+
+///////////////////////////////////////
+///
+/// the qg channel
+///
+///////////////////////////////////////
+
+///////integration routines
+double vegas_NLO_qg_full(double *k, size_t dim, void *params){
 	(void)(dim);
-	lumni_params * lp = (lumni_params *)params;
-	double z = lp->z;
-	double eps = 0.0001;
-	double zpeps = z + eps;
-	double zmeps = z - eps;
-	double jacp = 1.-tau/zpeps, jacm = 1.-tau/zmeps;
-	double xpeps = tau/zpeps+k[0]*jacp, xmeps = tau/zmeps+k[0]*jacm;
-	return derivative_qq_pdf_jac(k[0], z, tau);
-	//return (jacp*xpeps*(zpeps-tau)-jacm*xmeps*(zmeps-tau))/(2*eps); // jacobian needs to be in the derivative
+	(void)(params);
+	double z = k[0];
+	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
+	double x = tau/z+k[1]*jacobian;
+	return LO_factor()*(NLO_qg_full(z))*(jacobian*pdf_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
 }
-double vegas_sig_testfunction2(double *k, size_t dim, void *params){
+double vegas_NLO_qg_NLP(double *k, size_t dim, void *params){
 	(void)(dim);
-	lumni_params * lp = (lumni_params *)params;
-	double z = lp->z;
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms [be sure to integrate from 0 to 1]
-	double x = tau/z+k[0]*jacobian;
-	//return jacobian*x*(z-tau); 
-	return jacobian*pdf_sum_qq_charge_weighted(x, tau/z)/z;
+	(void)(params);
+	double z = k[0];
+	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
+	double x = tau/z+k[1]*jacobian;
+	return LO_factor()*(NLO_qg_NLP(z))*(jacobian*pdf_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
+}
+double vegas_NLO_qg_NNLP(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	double z = k[0];
+	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
+	double x = tau/z+k[1]*jacobian;
+	return LO_factor()*(NLO_qg_NNLP(z))*(jacobian*pdf_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
+}
+double vegas_NLO_qg_NNNLP(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	double z = k[0];
+	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
+	double x = tau/z+k[1]*jacobian;
+	return LO_factor()*(NLO_qg_NNNLP(z))*(jacobian*pdf_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
+}
+
+//////// NLO functions
+double NLO_qg_NLP(double x){
+	return (alphas_Q*TF*(log(Q2/muF2) + 2*log(1 - x)))/(2.*M_PI);
+}
+double NLO_qg_NNLP(double x){
+	return (alphas_Q*TF*(-1 + x)*(-5 + 2*log(Q2/muF2) + 4*log(1 - x)))/(2.*M_PI);
+}
+double NLO_qg_NNNLP(double x){
+	return (alphas_Q*TF*pow(-1 + x,2)*(-5 + 2*log(Q2/muF2) + 4*log(1 - x)))/(2.*M_PI);
+}
+double NLO_qg_full(double x){
+	return (alphas_Q*TF*(1 + 6*x - 7*pow(x,2) + 2*(1 - 2*x + 2*pow(x,2))*(log(Q2/muF2) + 2*log(1 - x) - log(x))))/(4.*M_PI);
 }

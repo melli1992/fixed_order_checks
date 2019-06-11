@@ -21,7 +21,7 @@ using namespace std;
 
 double Q(500.);
 double Q2(pow(Q,2.));
-double S(14000.);
+double S(13000.);
 double S2(pow(S,2.));
 double tau(Q2/S2);
 double muF(Q);
@@ -32,6 +32,7 @@ double CF(4./3.);
 double CA(3.);
 double TF(1./2.);
 double alphaEM(1./132.507);
+double GF(1.166379e-5);
 double alphas_muF(0);
 double alphas_muR(0);
 double alphas_Q(0);
@@ -39,7 +40,7 @@ double nF(5);
 double zeta2(1.6449340668482264);
 double zeta3(1.2020569031595942);
 double pbunits(0.38937966*pow(10.,9.));
-string setname("NNPDF31_nnlo_as_0118");
+string setname("PDF4LHC15_nnlo_100");
 std::vector<LHAPDF::PDF*> pdfs;
 double xmin_pdfs(0.), xmax_pdfs(0.); //min x, max x and alphas
 
@@ -50,7 +51,10 @@ double xmin_pdfs(0.), xmax_pdfs(0.); //min x, max x and alphas
 void print_usage() {
   cout << endl
        << "Usage:" << endl
-       << " -p   <set>     specify PDFs being used (default \"NNPDF31_nnlo_as_0118\")" << endl
+       << " -p   <set>     specify PDFs being used (default \"PDF4LHC15_nnlo_100\")" << endl
+       << "                installed: NNPDF31_nnlo_as_0118, CT14nnlo, PDF4LHC15_nnlo_100" << endl
+       << "                           NNPDF31_nlo_as_0118, CT14nlo, PDF4LHC15_nlo_100 " << endl
+	   << "							  MSTW2008nnlo90cl, MMHT2014nlo68cl, GRVPI0" << endl
        << " -Q   <Q>      set transferred momentum Q [GeV]" << endl
        << " -r   <muR>         set renormalization scale [GeV]" << endl
        << " -f   <muF>         set factorization scale [GeV]" << endl

@@ -39,4 +39,16 @@ double vegas_qg_full_int(double *k, size_t dim, void *params);
 double vegas_sig_testfunction1(double *k, size_t dim, void *params);
 double vegas_sig_testfunction2(double *k, size_t dim, void *params);
 
+
+
+//needed for qg
+double vegas_NLO_qg_NLP(double *k, size_t dim, void *params);
+double vegas_NLO_qg_NNLP(double *k, size_t dim, void *params);
+double vegas_NLO_qg_NNNLP(double *k, size_t dim, void *params);
+double vegas_NLO_qg_full(double *k, size_t dim, void *params);
+double NLO_qg_NLP(double x);
+double NLO_qg_NNLP(double x);
+double NLO_qg_NNNLP(double x);
+double NLO_qg_full(double x);
+
 #endif
