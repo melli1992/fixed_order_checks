@@ -10,6 +10,8 @@
 #include "parameters.h"
 #include "LHAPDF/LHAPDF.h"
 #include <gsl/gsl_math.h>
+#include <gsl/gsl_complex.h>
+#include <gsl/gsl_complex_math.h>
 #include <gsl/gsl_sf_fermi_dirac.h>
 #include <gsl/gsl_sf_zeta.h>
 #include <gsl/gsl_sf_dilog.h>
@@ -18,6 +20,7 @@
 #include <string.h>
 #include <sstream>
 #include "polygamma.h"
+#include "mellin_pdf.h"
 
 using namespace std;
 
@@ -38,8 +41,7 @@ int main(int argc, char* argv[]){
 	//////////////////////////////////////////////
 	/// predefinition of everything, setting it up
 	//////////////////////////////////////////////
-	
-	read_arguments(argc,argv);
+  read_arguments(argc,argv);
 	LHAPDF::PDFSet setk(setname);
 	print_defaults();
 	int nmem(0.); //number of members
@@ -55,12 +57,12 @@ int main(int argc, char* argv[]){
 	cout << "alphas_Q " << alphas_Q << endl;
 	cout << "alphas_muF " << alphas_muF << endl;
 	cout << "alphas_muR " << alphas_muR << endl;
-	S12(1.-0.1);
 	double z;
-	lumni_params params = {z, pdfs};
+	double eta = 1.5;
+	lumni_params params = {z, Q, 2*Q/S, exp(eta), exp(-eta), 0,0,0};
 	params.z = 0.5;
 	///////////////
-	bool DY = true, higgs = true;
+	bool DY = false, higgs = false, PF = true;
 	bool TEST=true;
 	//LO
 	bool LO = true;
@@ -69,12 +71,17 @@ int main(int argc, char* argv[]){
 	//NLO
 	bool NLO = true;
 	results NLO_qqbar_hard, NLO_qqbar_LP_part1, NLO_qqbar_LP_cor, NLO_qqbar_LPint, NLO_qqbar_NLP, NLO_qqbar_NNLP,NLO_qqbar_delta, NLO_qqbar_LP, NLO_qqbar_full, res_NLO_qg_full,res_NLO_qg_NLP,res_NLO_qg_NNLP,res_NLO_qg_NNNLP;
-	results res_higgs_NLO_gg_hard, res_higgs_NLO_gg_LP, res_higgs_NLO_gg_LP_part1,res_higgs_NLO_gg_LP_cor, res_higgs_NLO_gg_NLP, res_higgs_NLO_gg_NNLP,res_higgs_NLO_gg_NNNLP,res_higgs_NLO_gg_delta, res_higgs_NLO_gg_full, res_higgs_NLO_qg_full,res_higgs_NLO_qg_NLP,res_higgs_NLO_qg_NNLP,res_higgs_NLO_qg_NNNLP;
+	results res_higgs_NLO_gg_hard, res_higgs_NLO_gg_LP, res_higgs_NLO_gg_LP_part1, res_higgs_NLO_gg_LP_cor,res_higgs_NLO_gg_delta, res_higgs_NLO_gg_accum, res_higgs_NLO_gg_full, res_higgs_NLO_qg_full,res_higgs_NLO_qg_accum, res_higgs_NLO_qqbar_full,res_higgs_NLO_qqbar_accum;
+	results res_pf_NLO_qqbar_hard, res_pf_NLO_qqbar_LP, res_pf_NLO_qqbar_LP_part1, res_pf_NLO_qqbar_LP_cor,res_pf_NLO_qqbar_delta, res_pf_NLO_qqbar_accum, res_pf_NLO_qqbar_full;
+	vector<results> higgs_NLO_gg_powers;
+	vector<results> higgs_NLO_qg_powers;
+	vector<results> higgs_NLO_qqbar_powers;
+	vector<results> pf_NLO_qqbar_powers;
 	//NNLO
-	bool NNLO = false;
+	bool NNLO = true;
 	results res_NNLO_qqbar_hard, res_NNLO_qqbar_LP_part1, res_NNLO_qqbar_LP_cor, res_NNLO_qqbar_LPint, res_NNLO_qqbar_NLP, res_NNLO_qqbar_NNLP,res_NNLO_qqbar_NNNLP,res_NNLO_qqbar_delta, res_NNLO_qqbar_LP, res_NNLO_qqbar_full, res_NNLO_qg_full,res_NNLO_qg_NLP,res_NNLO_qg_NNLP,res_NNLO_qg_NNNLP, res_NNLO_gg_full,res_NNLO_gg_NLP,res_NNLO_gg_NNLP,res_NNLO_gg_NNNLP, res_NNLO_qq_full,res_NNLO_qq_NLP,res_NNLO_qq_NNLP,res_NNLO_qq_NNNLP, res_NNLO_qqbarNI_full,res_NNLO_qqbarNI_NLP,res_NNLO_qqbarNI_NNLP,res_NNLO_qqbarNI_NNNLP,res_NNLO_qqNI_full,res_NNLO_qqNI_NLP,res_NNLO_qqNI_NNLP,res_NNLO_qqNI_NNNLP,res_NNLO_qbarqbarNI_full,res_NNLO_qbarqbarNI_NLP,res_NNLO_qbarqbarNI_NNLP,res_NNLO_qbarqbarNI_NNNLP,res_NNLO_qbarqbar_full,res_NNLO_qbarqbar_NLP,res_NNLO_qbarqbar_NNLP,res_NNLO_qbarqbar_NNNLP;
 	ofstream output;
-	string q_str = "output_Q" + to_string(Q) +"_as"+to_string(alphas_Q)+"_"+setname;
+	string q_str = "2output_Q" + to_string(Q) +"_as"+to_string(alphas_Q)+"_"+setname;
 	if(DY) q_str = q_str+"_DY";
 	if(higgs) q_str = q_str+"_Higgs";
 	if(LO) q_str = q_str+"_LO";
@@ -83,15 +90,52 @@ int main(int argc, char* argv[]){
 	q_str = q_str + ".txt";
 	output.open(q_str.c_str()); //.c_str() needed to do a constant string conversion
 	//////////////////////////////////////////////
-	
-	
+    ofstream output2;
+	output2.open("mellinDY.out");
+  for(int i = 0; i < 10; i ++)
+	{
+		for(int j = 0; j < 2; j++){
+			results out1, out2, out3, out4, out5, out6, out7,out8;
+			CMP = 2.0+i*0.2;
+			phiMP = (0.5+j*0.1)*M_PI;
+			/*out1 = call_vegas(init_vegas_mellin("full"),params);
+			out2 = call_vegas(init_vegas_mellin("deriv"),params);
+			out3 = call_vegas(init_vegas_mellin("defor"),params);
+			out4 = call_vegas(init_vegas_mellin("nspace"),params);*/
+			out5 = call_vegas(init_vegas_mellin("LOnul"),params);
+		  out6 = call_vegas(init_vegas_mellin("LOderiv"),params);
+		  out7 = call_vegas(init_vegas_mellin("LOdefor"),params);
+ 		  out8 = call_vegas(init_vegas_mellin("resumdefor"),params);
+			cout << "CMP = " << CMP << " phi = " << phiMP << endl;
+			/*cout << "as is = " << out1.res << " " << out1.err << endl;
+			cout << "deriv = " <<  out2.res << " " << out2.err << endl;
+			cout << "deformation = " << out3.res << " " << out3.err << endl;
+			cout << "n space = " <<  out4.res << " " << out4.err << endl;
+			output2 << "CMP = " << CMP << " phi = " << phiMP << endl;
+			output2 << "as is = " << out1.res << " " << out1.err << endl;
+			output2 << "deriv = " <<  out2.res << " " << out2.err << endl;
+			output2 << "deformation = " << out3.res << " " << out3.err << endl;
+			output2 << "n space = " <<  out4.res << " " << out4.err << endl;*/
+			cout << out5.res << " " << out5.err << endl;
+			cout << out6.res << " " << out6.err << endl;
+			cout << out7.res << " " << out7.err << endl;
+			cout << out8.res << " " << out8.err << endl;
+			output2 << "true = " << out5.res << " " << out5.err << endl;
+			output2 << "deriv = " << out6.res << " " << out6.err << endl;
+			output2 << "deform = " << out7.res << " " << out7.err << endl;
+			output2 << "resum = " << out8.res << " " << out8.err << endl;
+	//		output2 << "n space = " <<  out6.res << " " << out6.err << endl;
+			output2 << "=======" << endl;
+		}
+	}
+	exit(0);
 	if(TEST && DY){
 		string q_str = "test_values_" + to_string(Q) +"_as"+to_string(alphas_Q)+"_"+setname+".txt";
 		ofstream output2;
 		output2.open(q_str.c_str()); //.c_str() needed to do a constant string conversion
 		cout << "---------- TESTING PARAMETERS -----------" << endl;
 		for(int i =1; i < 10; i++)
-		{ 
+		{
 			double z = (i)*0.1;
 			output2 << "=====================================" << endl;
 			output2 << "z = " << z << endl;
@@ -129,11 +173,11 @@ int main(int argc, char* argv[]){
 			output2 << "NNLO qqbarNI NLP = " << NNLO_qqbarNI_NLP(z) << endl;
 			output2 << "NNLO qqbarNI NNLP = " << NNLO_qqbarNI_NNLP(z) << endl;
 			output2 << "NNLO qqbarNI NNNLP = " << NNLO_qqbarNI_NNNLP(z) << endl;
-			
+
 		}
 		output2.close();
 	}
-	
+
 	if(TEST && higgs){
 		string q_str = "test_values_" + to_string(Q) +"_as"+to_string(alphas_Q)+"_"+setname+"_higgs.txt";
 		ofstream output2;
@@ -141,25 +185,37 @@ int main(int argc, char* argv[]){
 		cout << "---------- TESTING PARAMETERS -----------" << endl;
 		output2 << alphas_Q << endl;
 		for(int i =1; i < 10; i++)
-		{ 
+		{
 			double z = (i)*0.1;
 			output2 << "=====================================" << endl;
 			output2 << "z = " << z << endl;
 			output2 << "NLO gg full = " << higgs_NLO_gg_full(z) << endl;
 			output2 << "NLO gg LP = " << higgs_NLO_gg_LP(z) << endl;
-			output2 << "NLO gg NLP = " << higgs_NLO_gg_NLP(z) << endl;
-			output2 << "NLO gg NNLP = " << higgs_NLO_gg_NNLP(z) << endl;
-			output2 << "NLO gg NNNLP = " << higgs_NLO_gg_NNNLP(z) << endl;
+			for(int j=1; j<10; j++)
+			{
+				output2 << "NLO gg power "<< j << "= " << higgs_NLO_gg_expansion(z,j) << endl;
+			}
 			output2 << "NLO gg delta = " << higgs_NLO_gg_delta() << endl;
-			
+
+			output2 << "NLO qg full = " << higgs_NLO_qg_full(z) << endl;
+			for(int j=1; j<10; j++)
+			{
+				output2 << "NLO qg power "<< j << "= " << higgs_NLO_qg_expansion(z,j) << endl;
+			}
+
+			output2 << "NLO qqbar full = " << higgs_NLO_qqbar_full(z) << endl;
+			for(int j=1; j<10; j++)
+			{
+				output2 << "NLO qqbar power "<< j << "= " << higgs_NLO_qqbar_expansion(z,j) << endl;
+			}
+
 		}
 		output2.close();
 	}
-	
+
 	/////////////////////////
-	/// integration routines 
+	/// integration routines
 	/////////////////////////
-	
 	//LO
 	if(LO){
 		if(DY){
@@ -167,13 +223,13 @@ int main(int argc, char* argv[]){
 			cout << "computing LO (DY)" << endl;
 			LO_qqbar_full = call_vegas(init_vegas_dy("LO"), params);
 		}
-		else if(higgs){
+		if(higgs){
 			/// LO gg
 			cout << "computing LO (higgs)" << endl;
 			higgs_LO_gg_full = call_vegas(init_vegas_higgs("LO"), params);
 		}
 	}
-	
+
 	//NLO
 	if(NLO){
 		if(DY){
@@ -197,27 +253,56 @@ int main(int argc, char* argv[]){
 			res_NLO_qg_NNLP = call_vegas(init_vegas_dy("NLO","NNLP","qg"), params);
 			res_NLO_qg_NNNLP = call_vegas(init_vegas_dy("NLO","NNNLP","qg"), params);
 		}
-		else if(higgs){
+		if(higgs){
 			/// NLO gg
 			cout << "computing NLO gg (Higgs)" << endl;
 			res_higgs_NLO_gg_hard = call_vegas(init_vegas_higgs("NLO"), params);
 			res_higgs_NLO_gg_LP_part1 = call_vegas(init_vegas_higgs("NLO","LP"), params);
 			res_higgs_NLO_gg_LP_cor = call_vegas(init_vegas_higgs("NLO","LP_corr"), params);
-			cout << res_higgs_NLO_gg_LP_cor.res << endl;
-			res_higgs_NLO_gg_NLP = call_vegas(init_vegas_higgs("NLO","NLP"), params);
-			res_higgs_NLO_gg_NNLP = call_vegas(init_vegas_higgs("NLO","NNLP"), params);
-			res_higgs_NLO_gg_NNNLP = call_vegas(init_vegas_higgs("NLO","NNNLP"), params);
 			res_higgs_NLO_gg_delta = call_vegas(init_vegas_higgs("NLO","delta"), params);
 			res_higgs_NLO_gg_LP.res = res_higgs_NLO_gg_LP_part1.res + res_higgs_NLO_gg_LP_cor.res;
 			res_higgs_NLO_gg_LP.err = res_higgs_NLO_gg_LP_part1.err + res_higgs_NLO_gg_LP_cor.err;
 			res_higgs_NLO_gg_full.res = res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res + res_higgs_NLO_gg_hard.res;
 			res_higgs_NLO_gg_full.err = res_higgs_NLO_gg_LP.err + res_higgs_NLO_gg_delta.err + res_higgs_NLO_gg_hard.err;
-			/// NLO qg
-			//cout << "computing NLO qg" << endl;
-			//res_NLO_qg_full = call_vegas(init_vegas_dy("NLO","full","qg"), params);
-			//res_NLO_qg_NLP = call_vegas(init_vegas_dy("NLO","NLP","qg"), params);
-			//res_NLO_qg_NNLP = call_vegas(init_vegas_dy("NLO","NNLP","qg"), params);
-			//res_NLO_qg_NNNLP = call_vegas(init_vegas_dy("NLO","NNNLP","qg"), params);
+			res_higgs_NLO_gg_accum.res = res_higgs_NLO_gg_LP.res+res_higgs_NLO_gg_delta.res;
+			res_higgs_NLO_gg_accum.err = res_higgs_NLO_gg_LP.err+res_higgs_NLO_gg_delta.err;
+
+			///NLOqg
+			res_higgs_NLO_qg_full = call_vegas(init_vegas_higgs("NLO","full","qg"), params);
+			res_higgs_NLO_qg_accum.res = 0;
+			res_higgs_NLO_qg_accum.err = 0;
+
+			///NLOqqbar
+			res_higgs_NLO_qqbar_full = call_vegas(init_vegas_higgs("NLO","full","qqbar"), params);
+			res_higgs_NLO_qqbar_accum.res = 0;
+			res_higgs_NLO_qqbar_accum.err = 0;
+
+
+			//power expansion
+			for(int i =1; i<5;i++){
+				cout << "Computing power " << i << endl;
+				params.power = i;
+				/// NLO gg
+				higgs_NLO_gg_powers.push_back(call_vegas(init_vegas_higgs("NLO","powers","gg", params.power), params));
+				/// NLO qg
+				higgs_NLO_qg_powers.push_back(call_vegas(init_vegas_higgs("NLO","powers","qg", params.power), params));
+				/// NLO qqbar
+				higgs_NLO_qqbar_powers.push_back(call_vegas(init_vegas_higgs("NLO","powers","qqbar", params.power), params));
+			}
+		}
+		if(PF){
+			cout << "computing NLO qqbar (prompt photon)" << endl;
+		  res_pf_NLO_qqbar_hard = call_vegas(init_vegas_pf("NLO"), params);
+			res_pf_NLO_qqbar_LP_part1 = call_vegas(init_vegas_pf("NLO","LP"), params);
+			res_pf_NLO_qqbar_LP_cor = call_vegas(init_vegas_pf("NLO","LP_corr"), params);
+			res_pf_NLO_qqbar_delta = call_vegas(init_vegas_pf("NLO","delta"), params);
+			res_pf_NLO_qqbar_LP.res = res_pf_NLO_qqbar_LP_part1.res + res_pf_NLO_qqbar_LP_cor.res;
+			res_pf_NLO_qqbar_LP.err = res_pf_NLO_qqbar_LP_part1.err + res_pf_NLO_qqbar_LP_cor.err;
+			res_pf_NLO_qqbar_full.res = res_pf_NLO_qqbar_LP.res + res_pf_NLO_qqbar_delta.res + res_pf_NLO_qqbar_hard.res;
+			res_pf_NLO_qqbar_full.err = res_pf_NLO_qqbar_LP.err + res_pf_NLO_qqbar_delta.err + res_pf_NLO_qqbar_hard.err;
+			res_pf_NLO_qqbar_accum.res = res_pf_NLO_qqbar_LP.res+res_pf_NLO_qqbar_delta.res;
+			res_pf_NLO_qqbar_accum.err = res_pf_NLO_qqbar_LP.err+res_pf_NLO_qqbar_delta.err;
+
 		}
 	}
 	if(NNLO&&DY){
@@ -235,7 +320,7 @@ int main(int argc, char* argv[]){
 		res_NNLO_qqbar_LP.err = res_NNLO_qqbar_LP_part1.err + res_NNLO_qqbar_LP_cor.err;
 		res_NNLO_qqbar_full.res = res_NNLO_qqbar_LP.res + res_NNLO_qqbar_delta.res + res_NNLO_qqbar_hard.res;
 		res_NNLO_qqbar_full.err = res_NNLO_qqbar_LP.err + res_NNLO_qqbar_delta.err + res_NNLO_qqbar_hard.err;
-		
+
 		cout << "computing NNLO qg" << endl;
 		res_NNLO_qg_full = call_vegas(init_vegas_dy("NNLO","full","qg"), params);
 		res_NNLO_qg_NLP = call_vegas(init_vegas_dy("NNLO","NLP","qg"), params);
@@ -272,7 +357,7 @@ int main(int argc, char* argv[]){
 		res_NNLO_qbarqbarNI_NNLP = call_vegas(init_vegas_dy("NNLO","NNLP","qbarqbarNI"), params);
 		res_NNLO_qbarqbarNI_NNNLP = call_vegas(init_vegas_dy("NNLO","NNNLP","qbarqbarNI"), params);
 	}
-	
+
 	/////////////////////////////////////
 	/// output of results to output file
 	/////////////////////////////////////
@@ -283,12 +368,12 @@ int main(int argc, char* argv[]){
     output << "alphas_Q " << alphas_Q << endl;
 	output << "alphas_muF " << alphas_muF << endl;
 	output << "alphas_muR " << alphas_muR << endl;
-	
+
     output << "---------------------------------------------------------------------------" << endl;
-    
+
     if(DY){
 		output << endl << "RESULTS (DY)" << endl;
-    
+
 		output << "..........................................................................." << endl;
 		if(LO){
 			output << "Total (LO): " << LO_qqbar_full.res << " pb/GeV^2 (" <<  LO_qqbar_full.err << ")" << endl;
@@ -319,7 +404,7 @@ int main(int argc, char* argv[]){
 			output << "LP (+delta): " << NLO_qqbar_LP.res + NLO_qqbar_delta.res << " pb/GeV^2 (" << NLO_qqbar_LP.err + NLO_qqbar_delta.err << ")"  << "  ; fractional: "<<(NLO_qqbar_LP.res + NLO_qqbar_delta.res)/(NLO_qqbar_full.res) << endl;
 			output << "NLP        : " << NLO_qqbar_NLP.res << " pb/GeV^2 (" << NLO_qqbar_NLP.err << ")"  << "  ; fractional: "<<(NLO_qqbar_NLP.res)/(NLO_qqbar_full.res) << endl;
 			output << "NNLP       : " << NLO_qqbar_NNLP.res << " pb/GeV^2 (" << NLO_qqbar_NNLP.err << ")"  << " ; fractional: "<<(NLO_qqbar_NNLP.res)/(NLO_qqbar_full.res) << endl;
-		   
+
 			output << endl << "CUMULATIVE" << endl;
 			output << "..........................................................................." << endl;
 			output << "LP : " << NLO_qqbar_LP.res  << " pb/GeV^2 " << " ; fractional: "<<(NLO_qqbar_LP.res)/(NLO_qqbar_full.res)<< endl;
@@ -327,19 +412,37 @@ int main(int argc, char* argv[]){
 			output << "LP + NLP + delta : " << NLO_qqbar_NLP.res+NLO_qqbar_LP.res + NLO_qqbar_delta.res << " pb/GeV^2 " << " ; fractional: "<<(NLO_qqbar_NLP.res+NLO_qqbar_LP.res + NLO_qqbar_delta.res )/(NLO_qqbar_full.res) << endl;
 			output << "LP + NLP + NNLP + delta: " << NLO_qqbar_NNLP.res+NLO_qqbar_NLP.res+NLO_qqbar_LP.res + NLO_qqbar_delta.res << " pb/GeV^2 " << " ; fractional: "<<(NLO_qqbar_NNLP.res+NLO_qqbar_NLP.res+NLO_qqbar_LP.res + NLO_qqbar_delta.res )/(NLO_qqbar_full.res) << endl;
 			output << "---------------------------------------------------------------------------" << endl;
-		
+
+			output << endl << "COMPARISON" << endl;
+			output << "..........................................................................." << endl;
+			output << "power 0 : " << NLO_qqbar_LP.res + LO_qqbar_full.res+NLO_qqbar_delta.res << " pb/GeV^2 "<<endl ;
+			output << "power 1 : " << NLO_qqbar_NLP.res+NLO_qqbar_LP.res + LO_qqbar_full.res+NLO_qqbar_delta.res << " pb/GeV^2 " << endl;
+			output << "power 2 : " << NLO_qqbar_NNLP.res+NLO_qqbar_NLP.res+NLO_qqbar_LP.res + LO_qqbar_full.res+NLO_qqbar_delta.res << " pb/GeV^2 " << endl;
+			//output << "power 3 : " << NLO_qqbar_NNNLP.res+NLO_qqbar_NNLP.res+NLO_qqbar_NLP.res+NLO_qqbar_LP.res + LO_qqbar_full.res+NLO_qqbar_delta.res << " pb/GeV^2 "  << endl;
+			output << "---------------------------------------------------------------------------" << endl;
+
+
 			output << "==================================qg results ==============================" << endl;
 			output << "NLP        : " << res_NLO_qg_NLP.res << " pb/GeV^2 (" << res_NLO_qg_NLP.err << ")"  << "  ; fractional: "<<(res_NLO_qg_NLP.res)/(res_NLO_qg_full.res) << endl;
 			output << "NNLP       : " << res_NLO_qg_NNLP.res << " pb/GeV^2 (" << res_NLO_qg_NNLP.err << ")"  << " ; fractional: "<<(res_NLO_qg_NNLP.res)/(res_NLO_qg_full.res) << endl;
 			output << "NNLP       : " << res_NLO_qg_NNNLP.res << " pb/GeV^2 (" << res_NLO_qg_NNNLP.err << ")"  << " ; fractional: "<<(res_NLO_qg_NNNLP.res)/(res_NLO_qg_full.res) << endl;
-		   
+
 			output << endl << "CUMULATIVE" << endl;
 			output << "..........................................................................." << endl;
 			output << "NLP : " << res_NLO_qg_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NLO_qg_NLP.res)/(res_NLO_qg_full.res) << endl;
 			output << "NLP + NNLP: " << res_NLO_qg_NNLP.res+res_NLO_qg_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NLO_qg_NNLP.res+res_NLO_qg_NLP.res)/(res_NLO_qg_full.res) << endl;
 			output << "NLP + NNLP + NNNLP: " << res_NLO_qg_NNNLP.res+res_NNLO_qg_NLP.res+res_NLO_qg_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NLO_qg_NNNLP.res+res_NLO_qg_NNLP.res+res_NLO_qg_NLP.res)/(res_NLO_qg_full.res) << endl;
-			
-		
+
+			output << endl << "COMPARISON" << endl;
+			output << "..........................................................................." << endl;
+
+			output << "power 0 : " << 0. << " pb/GeV^2 "<<endl ;
+			output << "power 1 : " << res_NLO_qg_NLP.res << " pb/GeV^2 " << endl;
+			output << "power 2 : " << res_NLO_qg_NNLP.res+res_NLO_qg_NLP.res << " pb/GeV^2 " <<  endl;
+			output << "power 3 : " << res_NLO_qg_NNNLP.res+res_NLO_qg_NNLP.res+res_NLO_qg_NLP.res << " pb/GeV^2 "  << endl;
+			output << "---------------------------------------------------------------------------" << endl;
+
+
 		}
 		if(NNLO){
 			output << endl << "POWER EXPANSION (NNLO)" << endl;
@@ -351,7 +454,7 @@ int main(int argc, char* argv[]){
 			output << "NLP        : " << res_NNLO_qqbar_NLP.res << " pb/GeV^2 (" << res_NNLO_qqbar_NLP.err << ")"  << "  ; fractional: "<<(res_NNLO_qqbar_NLP.res)/(res_NNLO_qqbar_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qqbar_NNLP.res << " pb/GeV^2 (" << res_NNLO_qqbar_NNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qqbar_NNLP.res)/(res_NNLO_qqbar_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qqbar_NNNLP.res << " pb/GeV^2 (" << res_NNLO_qqbar_NNNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qqbar_NNNLP.res)/(res_NNLO_qqbar_full.res) << endl;
-		   
+
 			output << endl << "CUMULATIVE" << endl;
 			output << "..........................................................................." << endl;
 			output << "LP : " << res_NNLO_qqbar_LP.res  << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qqbar_LP.res)/(res_NNLO_qqbar_full.res)<< endl;
@@ -360,134 +463,147 @@ int main(int argc, char* argv[]){
 			output << "LP + NLP + NNLP + delta: " << res_NNLO_qqbar_NNLP.res+res_NNLO_qqbar_NLP.res+res_NNLO_qqbar_LP.res + res_NNLO_qqbar_delta.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qqbar_NNLP.res+res_NNLO_qqbar_NLP.res+res_NNLO_qqbar_LP.res + res_NNLO_qqbar_delta.res )/(res_NNLO_qqbar_full.res) << endl;
 			output << "LP + NLP + NNLP + NNNLP + delta: " << res_NNLO_qqbar_NNNLP.res+res_NNLO_qqbar_NNLP.res+res_NNLO_qqbar_NLP.res+res_NNLO_qqbar_LP.res + res_NNLO_qqbar_delta.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qqbar_NNNLP.res+res_NNLO_qqbar_NNLP.res+res_NNLO_qqbar_NLP.res+res_NNLO_qqbar_LP.res + res_NNLO_qqbar_delta.res )/(res_NNLO_qqbar_full.res) << endl;
 			output << "..........................................................................." << endl;
-			
+
 			output << "==================================qg results ==============================" << endl;
 			output << "NLP        : " << res_NNLO_qg_NLP.res << " pb/GeV^2 (" << res_NNLO_qg_NLP.err << ")"  << "  ; fractional: "<<(res_NNLO_qg_NLP.res)/(res_NNLO_qg_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qg_NNLP.res << " pb/GeV^2 (" << res_NNLO_qg_NNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qg_NNLP.res)/(res_NNLO_qg_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qg_NNNLP.res << " pb/GeV^2 (" << res_NNLO_qg_NNNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qg_NNNLP.res)/(res_NNLO_qg_full.res) << endl;
-		   
+
 			output << endl << "CUMULATIVE" << endl;
 			output << "..........................................................................." << endl;
 			output << "NLP : " << res_NNLO_qg_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qg_NLP.res)/(res_NNLO_qg_full.res) << endl;
 			output << "NLP + NNLP: " << res_NNLO_qg_NNLP.res+res_NNLO_qg_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qg_NNLP.res+res_NNLO_qg_NLP.res)/(res_NNLO_qg_full.res) << endl;
 			output << "NLP + NNLP + NNNLP: " << res_NNLO_qg_NNNLP.res+res_NNLO_qg_NNLP.res+res_NNLO_qg_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qg_NNNLP.res+res_NNLO_qg_NNLP.res+res_NNLO_qg_NLP.res)/(res_NNLO_qg_full.res) << endl;
-				
+
 			output << "==================================gg results ==============================" << endl;
 			output << "NLP        : " << res_NNLO_gg_NLP.res << " pb/GeV^2 (" << res_NNLO_gg_NLP.err << ")"  << "  ; fractional: "<<(res_NNLO_gg_NLP.res)/(res_NNLO_gg_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_gg_NNLP.res << " pb/GeV^2 (" << res_NNLO_gg_NNLP.err << ")"  << " ; fractional: "<<(res_NNLO_gg_NNLP.res)/(res_NNLO_gg_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_gg_NNNLP.res << " pb/GeV^2 (" << res_NNLO_gg_NNNLP.err << ")"  << " ; fractional: "<<(res_NNLO_gg_NNNLP.res)/(res_NNLO_gg_full.res) << endl;
-		   
+
 			output << endl << "CUMULATIVE" << endl;
 			output << "..........................................................................." << endl;
 			output << "NLP : " << res_NNLO_gg_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_gg_NLP.res)/(res_NNLO_gg_full.res) << endl;
 			output << "NLP + NNLP: " << res_NNLO_gg_NNLP.res+res_NNLO_gg_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_gg_NNLP.res+res_NNLO_gg_NLP.res)/(res_NNLO_gg_full.res) << endl;
 			output << "NLP + NNLP + NNNLP: " << res_NNLO_gg_NNNLP.res+res_NNLO_gg_NNLP.res+res_NNLO_gg_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_gg_NNNLP.res+res_NNLO_gg_NNLP.res+res_NNLO_gg_NLP.res)/(res_NNLO_gg_full.res) << endl;
-				
+
 			output << "==================================qq results ==============================" << endl;
 			output << "NLP        : " << res_NNLO_qq_NLP.res << " pb/GeV^2 (" << res_NNLO_qq_NLP.err << ")"  << "  ; fractional: "<<(res_NNLO_qq_NLP.res)/(res_NNLO_qq_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qq_NNLP.res << " pb/GeV^2 (" << res_NNLO_qq_NNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qq_NNLP.res)/(res_NNLO_qq_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qq_NNNLP.res << " pb/GeV^2 (" << res_NNLO_qq_NNNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qq_NNNLP.res)/(res_NNLO_qq_full.res) << endl;
-		   
+
 			output << endl << "CUMULATIVE" << endl;
 			output << "..........................................................................." << endl;
 			output << "NLP : " << res_NNLO_qq_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qq_NLP.res)/(res_NNLO_qq_full.res) << endl;
 			output << "NLP + NNLP: " << res_NNLO_qq_NNLP.res+res_NNLO_qq_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qq_NNLP.res+res_NNLO_qq_NLP.res)/(res_NNLO_qq_full.res) << endl;
 			output << "NLP + NNLP + NNNLP: " << res_NNLO_qq_NNNLP.res+res_NNLO_qq_NNLP.res+res_NNLO_qq_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qq_NNNLP.res+res_NNLO_qq_NNLP.res+res_NNLO_qq_NLP.res)/(res_NNLO_qq_full.res) << endl;
-				
+
 			output << "==================================qbarqbar results ==============================" << endl;
 			output << "NLP        : " << res_NNLO_qbarqbar_NLP.res << " pb/GeV^2 (" << res_NNLO_qbarqbar_NLP.err << ")"  << "  ; fractional: "<<(res_NNLO_qbarqbar_NLP.res)/(res_NNLO_qbarqbar_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qbarqbar_NNLP.res << " pb/GeV^2 (" << res_NNLO_qbarqbar_NNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qbarqbar_NNLP.res)/(res_NNLO_qbarqbar_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qbarqbar_NNNLP.res << " pb/GeV^2 (" << res_NNLO_qbarqbar_NNNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qbarqbar_NNNLP.res)/(res_NNLO_qbarqbar_full.res) << endl;
-		   
+
 			output << endl << "CUMULATIVE" << endl;
 			output << "..........................................................................." << endl;
 			output << "NLP : " << res_NNLO_qbarqbar_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qbarqbar_NLP.res)/(res_NNLO_qbarqbar_full.res) << endl;
 			output << "NLP + NNLP: " << res_NNLO_qbarqbar_NNLP.res+res_NNLO_qbarqbar_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qbarqbar_NNLP.res+res_NNLO_qbarqbar_NLP.res)/(res_NNLO_qbarqbar_full.res) << endl;
 			output << "NLP + NNLP + NNNLP: " << res_NNLO_qbarqbar_NNNLP.res+res_NNLO_qbarqbar_NNLP.res+res_NNLO_qbarqbar_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qbarqbar_NNNLP.res+res_NNLO_qbarqbar_NNLP.res+res_NNLO_qbarqbar_NLP.res)/(res_NNLO_qbarqbar_full.res) << endl;
-				
+
 			output << "========================qq (non-identical) results ==============================" << endl;
 			output << "NLP        : " << res_NNLO_qqNI_NLP.res << " pb/GeV^2 (" << res_NNLO_qqNI_NLP.err << ")"  << "  ; fractional: "<<(res_NNLO_qqNI_NLP.res)/(res_NNLO_qqNI_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qqNI_NNLP.res << " pb/GeV^2 (" << res_NNLO_qqNI_NNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qqNI_NNLP.res)/(res_NNLO_qqNI_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qqNI_NNNLP.res << " pb/GeV^2 (" << res_NNLO_qqNI_NNNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qqNI_NNNLP.res)/(res_NNLO_qqNI_full.res) << endl;
-		   
+
 			output << endl << "CUMULATIVE" << endl;
 			output << "..........................................................................." << endl;
 			output << "NLP : " << res_NNLO_qqNI_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qqNI_NLP.res)/(res_NNLO_qqNI_full.res) << endl;
 			output << "NLP + NNLP: " << res_NNLO_qqNI_NNLP.res+res_NNLO_qqNI_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qqNI_NNLP.res+res_NNLO_qqNI_NLP.res)/(res_NNLO_qqNI_full.res) << endl;
 			output << "NLP + NNLP + NNNLP: " << res_NNLO_qqNI_NNNLP.res+res_NNLO_qqNI_NNLP.res+res_NNLO_qqNI_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qqNI_NNNLP.res+res_NNLO_qqNI_NNLP.res+res_NNLO_qqNI_NLP.res)/(res_NNLO_qqNI_full.res) << endl;
-				
+
 			output << "======================qqbar (non-identical) results ==============================" << endl;
 			output << "NLP        : " << res_NNLO_qqbarNI_NLP.res << " pb/GeV^2 (" << res_NNLO_qqbarNI_NLP.err << ")"  << "  ; fractional: "<<(res_NNLO_qqbarNI_NLP.res)/(res_NNLO_qqbarNI_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qqbarNI_NNLP.res << " pb/GeV^2 (" << res_NNLO_qqbarNI_NNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qqbarNI_NNLP.res)/(res_NNLO_qqbarNI_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qqbarNI_NNNLP.res << " pb/GeV^2 (" << res_NNLO_qqbarNI_NNNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qqbarNI_NNNLP.res)/(res_NNLO_qqbarNI_full.res) << endl;
-		   
+
 			output << endl << "CUMULATIVE" << endl;
 			output << "..........................................................................." << endl;
 			output << "NLP : " << res_NNLO_qqbarNI_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qqbarNI_NLP.res)/(res_NNLO_qqbarNI_full.res) << endl;
 			output << "NLP + NNLP: " << res_NNLO_qqbarNI_NNLP.res+res_NNLO_qqbarNI_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qqbarNI_NNLP.res+res_NNLO_qqbarNI_NLP.res)/(res_NNLO_qqbarNI_full.res) << endl;
 			output << "NLP + NNLP + NNNLP: " << res_NNLO_qqbarNI_NNNLP.res+res_NNLO_qqbarNI_NNLP.res+res_NNLO_qqbarNI_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qqbarNI_NNNLP.res+res_NNLO_qqbarNI_NNLP.res+res_NNLO_qqbarNI_NLP.res)/(res_NNLO_qqbarNI_full.res) << endl;
-			
-				
+
+
 			output << "====================qbarqbar (non-identical) results ============================" << endl;
 			output << "NLP        : " << res_NNLO_qbarqbarNI_NLP.res << " pb/GeV^2 (" << res_NNLO_qbarqbarNI_NLP.err << ")"  << "  ; fractional: "<<(res_NNLO_qbarqbarNI_NLP.res)/(res_NNLO_qbarqbarNI_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qbarqbarNI_NNLP.res << " pb/GeV^2 (" << res_NNLO_qbarqbarNI_NNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qbarqbarNI_NNLP.res)/(res_NNLO_qbarqbarNI_full.res) << endl;
 			output << "NNLP       : " << res_NNLO_qbarqbarNI_NNNLP.res << " pb/GeV^2 (" << res_NNLO_qbarqbarNI_NNNLP.err << ")"  << " ; fractional: "<<(res_NNLO_qbarqbarNI_NNNLP.res)/(res_NNLO_qbarqbarNI_full.res) << endl;
-		   
+
 			output << endl << "CUMULATIVE" << endl;
 			output << "..........................................................................." << endl;
 			output << "NLP : " << res_NNLO_qbarqbarNI_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qbarqbarNI_NLP.res)/(res_NNLO_qbarqbarNI_full.res) << endl;
 			output << "NLP + NNLP: " << res_NNLO_qbarqbarNI_NNLP.res+res_NNLO_qbarqbarNI_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qbarqbarNI_NNLP.res+res_NNLO_qbarqbarNI_NLP.res)/(res_NNLO_qbarqbarNI_full.res) << endl;
 			output << "NLP + NNLP + NNNLP: " << res_NNLO_qbarqbarNI_NNNLP.res+res_NNLO_qbarqbarNI_NNLP.res+res_NNLO_qbarqbarNI_NLP.res << " pb/GeV^2 " << " ; fractional: "<<(res_NNLO_qbarqbarNI_NNNLP.res+res_NNLO_qbarqbarNI_NNLP.res+res_NNLO_qbarqbarNI_NLP.res)/(res_NNLO_qbarqbarNI_full.res) << endl;
-			
+
 			output << "---------------------------------------------------------------------------" << endl;
 		}
 	}
     if(higgs){
 		output << endl << "RESULTS (higgs)" << endl;
-    
+
 		output << "..........................................................................." << endl;
 		if(LO){
 			output << "Total (LO): " << higgs_LO_gg_full.res << " pb (" <<  higgs_LO_gg_full.err << ")" << endl;
 		}
 		if(NLO){
+			output << "Total (NLO): " << res_higgs_NLO_gg_full.res+res_higgs_NLO_qg_full.res << " pb (" << res_higgs_NLO_gg_full.err+res_higgs_NLO_qg_full.err << ")" << endl;
 			output << "Total (NLO, gg): " << res_higgs_NLO_gg_full.res << " pb (" << res_higgs_NLO_gg_full.err << ")" << endl;
 			output << "Total (NLO, gg delta): " << higgs_LO_gg_full.res+res_higgs_NLO_gg_delta.res << " pb (" << res_higgs_NLO_gg_delta.err+higgs_LO_gg_full.err << ")" << endl;
 			output << "Total (NLO, gg z): " << res_higgs_NLO_gg_full.res-res_higgs_NLO_gg_delta.res << " pb (" << -res_higgs_NLO_gg_delta.err+res_higgs_NLO_gg_full.err << ")" << endl;
-			output << "Total (NLO, gg z): " << res_higgs_NLO_gg_full.res-res_higgs_NLO_gg_delta.res-res_higgs_NLO_gg_LP_cor.res << " pb (" << -res_higgs_NLO_gg_delta.err+res_higgs_NLO_gg_full.err << ")" << endl;
-		}
+			output << "Total (NLO, qg): " << res_higgs_NLO_qg_full.res << " pb (" << res_higgs_NLO_qg_full.err << ")" << endl;
+			}
 		output << "---------------------------------------------------------------------------" << endl;
 
 		if(NLO){
-			output << endl << "POWER EXPANSION (NLO)" << endl;
 			output << "==================================gg results ==============================" << endl;
-			output << "LP         : " << res_higgs_NLO_gg_LP.res  << " pb (" << res_higgs_NLO_gg_LP.err  << ")"  << endl;
-			output << "delta      : " << res_higgs_NLO_gg_delta.res << " pb (" << res_higgs_NLO_gg_delta.err << ")"  << "  ; fractional: "<<(res_higgs_NLO_gg_delta.res)/(res_higgs_NLO_gg_full.res) << endl;
-			output << "LP +delta  : " << res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res << " pb (" << res_higgs_NLO_gg_LP.err + res_higgs_NLO_gg_delta.err << ")"  << "  ; fractional: "<<(res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res)/(res_higgs_NLO_gg_full.res) << endl;
-			output << "NLP        : " << res_higgs_NLO_gg_NLP.res << " pb (" << res_higgs_NLO_gg_NLP.err << ")"  << "  ; fractional: "<<(res_higgs_NLO_gg_NLP.res)/(res_higgs_NLO_gg_full.res) << endl;
-			output << "NNLP       : " << res_higgs_NLO_gg_NNLP.res << " pb (" << res_higgs_NLO_gg_NNLP.err << ")"  << " ; fractional: "<<(res_higgs_NLO_gg_NNLP.res)/(res_higgs_NLO_gg_full.res) << endl;
-		    output << "NNNLP       : " << res_higgs_NLO_gg_NNNLP.res << " pb (" << res_higgs_NLO_gg_NNNLP.err << ")"  << " ; fractional: "<<(res_higgs_NLO_gg_NNNLP.res)/(res_higgs_NLO_gg_full.res) << endl;
-		   
-			output << endl << "CUMULATIVE" << endl;
-			output << "..........................................................................." << endl;
-			output << "LP : " << res_higgs_NLO_gg_LP.res  << " pb " << " ; fractional: "<<(res_higgs_NLO_gg_LP.res)/(res_higgs_NLO_gg_full.res)<< endl;
-			output << "LP + delta : " << res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res  << " pb " << " ; fractional: "<<(res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res)/(res_higgs_NLO_gg_full.res)<< endl;
-			output << "LP + NLP + delta : " << res_higgs_NLO_gg_NLP.res+res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res << " pb " << " ; fractional: "<<(res_higgs_NLO_gg_NLP.res+res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res )/(res_higgs_NLO_gg_full.res) << endl;
-			output << "LP + NLP + NNLP + delta: " << res_higgs_NLO_gg_NNLP.res+res_higgs_NLO_gg_NLP.res+res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res << " pb " << " ; fractional: "<<(res_higgs_NLO_gg_NNLP.res+res_higgs_NLO_gg_NLP.res+res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res )/(res_higgs_NLO_gg_full.res) << endl;
-			output << "LP + NLP + NNLP + NNNLP + delta: " << res_higgs_NLO_gg_NNNLP.res+res_higgs_NLO_gg_NNLP.res+res_higgs_NLO_gg_NLP.res+res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res << " pb " << " ; fractional: "<<(res_higgs_NLO_gg_NNNLP.res+res_higgs_NLO_gg_NNLP.res+res_higgs_NLO_gg_NLP.res+res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res )/(res_higgs_NLO_gg_full.res) << endl;
-			output << "---------------------------------------------------------------------------" << endl;
-			
-			output << endl << "COMPARISON" << endl;
-			output << "..........................................................................." << endl;
-			output << "power 0 : " << res_higgs_NLO_gg_LP.res + higgs_LO_gg_full.res+res_higgs_NLO_gg_delta.res << " pb " << " ; fractional: "<<(res_higgs_NLO_gg_LP.res)/(res_higgs_NLO_gg_full.res)<< endl;
-			output << "power 1 : " << res_higgs_NLO_gg_LP.res + higgs_LO_gg_full.res+res_higgs_NLO_gg_delta.res  << " pb " << " ; fractional: "<<(res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res)/(res_higgs_NLO_gg_full.res)<< endl;
-			output << "power 2 : " << res_higgs_NLO_gg_NLP.res+res_higgs_NLO_gg_LP.res + higgs_LO_gg_full.res+res_higgs_NLO_gg_delta.res << " pb " << " ; fractional: "<<(res_higgs_NLO_gg_NLP.res+res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res )/(res_higgs_NLO_gg_full.res) << endl;
-			output << "power 3 : " << res_higgs_NLO_gg_NNLP.res+res_higgs_NLO_gg_NLP.res+res_higgs_NLO_gg_LP.res + higgs_LO_gg_full.res+res_higgs_NLO_gg_delta.res << " pb " << " ; fractional: "<<(res_higgs_NLO_gg_NNLP.res+res_higgs_NLO_gg_NLP.res+res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res )/(res_higgs_NLO_gg_full.res) << endl;
-			output << "power 4 : " << res_higgs_NLO_gg_NNNLP.res+res_higgs_NLO_gg_NNLP.res+res_higgs_NLO_gg_NLP.res+res_higgs_NLO_gg_LP.res + higgs_LO_gg_full.res+res_higgs_NLO_gg_delta.res << " pb " << " ; fractional: "<<(res_higgs_NLO_gg_NNNLP.res+res_higgs_NLO_gg_NNLP.res+res_higgs_NLO_gg_NLP.res+res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res )/(res_higgs_NLO_gg_full.res) << endl;
-			output << "---------------------------------------------------------------------------" << endl;
-	
+			output << "LP : " << res_higgs_NLO_gg_LP.res  << " pb, fractional: "<<(res_higgs_NLO_gg_LP.res)/(res_higgs_NLO_gg_full.res)<< "; increase is " << res_higgs_NLO_gg_LP.res  << "(+/-" << res_higgs_NLO_gg_LP.err  << ") pb" << endl;
+			output << "LP + delta : " << res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res  << " pb, fractional: "<<(res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res)/(res_higgs_NLO_gg_full.res)<< "; increase is " << res_higgs_NLO_gg_delta.res  << "(+/-" << res_higgs_NLO_gg_delta.err  << ") pb" << endl;
+			for(int i = 1; i < higgs_NLO_gg_powers.size(); i++){
+				res_higgs_NLO_gg_accum.res = res_higgs_NLO_gg_accum.res+higgs_NLO_gg_powers[i].res;
+				output << "power "<<i<<" : " << res_higgs_NLO_gg_accum.res << " pb, fractional: "<< res_higgs_NLO_gg_accum.res/res_higgs_NLO_gg_full.res << "; increase is "  << higgs_NLO_gg_powers[i].res << "(+/-"<< higgs_NLO_gg_powers[i].err << ") pb" << endl;
+			}
+			res_higgs_NLO_gg_accum.res = res_higgs_NLO_gg_LP.res+res_higgs_NLO_gg_delta.res+higgs_LO_gg_full.res;
+			res_higgs_NLO_gg_accum.err = res_higgs_NLO_gg_LP.err+res_higgs_NLO_gg_delta.err+higgs_LO_gg_full.err;
+			output << "==================================gg +LO results ==============================" << endl;
+			output << "LP : " << res_higgs_NLO_gg_LP.res  << " pb, fractional: "<<(res_higgs_NLO_gg_LP.res)/(res_higgs_NLO_gg_full.res)<< "; increase is " << res_higgs_NLO_gg_LP.res  << "(+/-" << res_higgs_NLO_gg_LP.err  << ") pb" << endl;
+			output << "LP + delta : " << res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res +higgs_LO_gg_full.res << " pb, fractional: "<<(res_higgs_NLO_gg_LP.res + res_higgs_NLO_gg_delta.res)/(res_higgs_NLO_gg_full.res)<< "; increase is " << res_higgs_NLO_gg_delta.res  << "(+/-" << res_higgs_NLO_gg_delta.err  << ") pb" << endl;
+
+			for(int i = 1; i < higgs_NLO_gg_powers.size(); i++){
+				res_higgs_NLO_gg_accum.res = res_higgs_NLO_gg_accum.res+higgs_NLO_gg_powers[i].res;
+				output << "power "<<i<<" : " << res_higgs_NLO_gg_accum.res << " pb, fractional: "<< res_higgs_NLO_gg_accum.res/res_higgs_NLO_gg_full.res << "; increase is "  << higgs_NLO_gg_powers[i].res << "(+/-"<< higgs_NLO_gg_powers[i].err << ") pb" << endl;
+			}
+			output << "==================================qg results ==============================" << endl;
+			for(int i = 1; i < higgs_NLO_qg_powers.size(); i++){
+				res_higgs_NLO_qg_accum.res = res_higgs_NLO_qg_accum.res+higgs_NLO_qg_powers[i].res;
+				output << "power "<<i<<" : " << res_higgs_NLO_qg_accum.res << " pb, fractional: "<< res_higgs_NLO_qg_accum.res/res_higgs_NLO_qg_full.res << "; increase is "  << higgs_NLO_qg_powers[i].res << "(+/-"<< higgs_NLO_qg_powers[i].err << ") pb" << endl;
+			}
+			output << "==================================qqbar results ==============================" << endl;
+			for(int i = 1; i < higgs_NLO_qqbar_powers.size(); i++){
+				res_higgs_NLO_qqbar_accum.res = res_higgs_NLO_qqbar_accum.res+higgs_NLO_qqbar_powers[i].res;
+				output << "power "<<i<<" : " << res_higgs_NLO_qqbar_accum.res << " pb, fractional: "<< res_higgs_NLO_qqbar_accum.res/res_higgs_NLO_qqbar_full.res << "; increase is "  << higgs_NLO_qqbar_powers[i].res << "(+/-"<< higgs_NLO_qqbar_powers[i].err << ") pb" << endl;
+			}
+
 		}
 	}
-			
+		if(PF){
+			output << endl << "RESULTS (prompt photon)" << endl;
+			if(NLO){
+				output << "Total (NLO): " << res_pf_NLO_qqbar_full.res+res_pf_NLO_qqbar_full.res << " pb (" << res_pf_NLO_qqbar_full.err+res_pf_NLO_qqbar_full.err << ")" << endl;
+				output << "Total (NLO, gg): " << res_pf_NLO_qqbar_full.res << " pb (" << res_pf_NLO_qqbar_full.err << ")" << endl;
+				output << "Total (NLO, LP): " << res_pf_NLO_qqbar_LP.res << " pb (" << res_pf_NLO_qqbar_LP.err << ")" << endl;
+			  output << "Total (NLO, gg delta): " << res_pf_NLO_qqbar_delta.res << " pb (" << res_pf_NLO_qqbar_delta.err << ")" << endl;
+				output << "Total (NLO, gg z): " << res_pf_NLO_qqbar_full.res-res_pf_NLO_qqbar_delta.res << " pb (" << -res_pf_NLO_qqbar_delta.err+res_pf_NLO_qqbar_full.err << ")" << endl;
+				}
+			output << "---------------------------------------------------------------------------" << endl;
+
+		}
 	output.close();
 	return 0;
 }

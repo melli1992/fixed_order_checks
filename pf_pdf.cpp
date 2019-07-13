@@ -13,29 +13,27 @@ using namespace std;
 /// this file contains all pdf related stuff, like sums of qqbar
 /// and derivatives of pdfs
 /// note that the xfxQ function of LHAPDF returns the x*f(x) value
+/// use this only for the prompt photon stuff
 ///
 ////////////////////////////////////////////////////////////////////////
 
 
 
+
 /////////////////////////////////////////////////////////////////////////
-/// this is the qqbar sum with normal x and tau/z inputs for the integral
-/// int[1/x*f_1(x,Q)*f_2(tau/(z*x),Q),{x,tau/z,1}]
+/// this is the qqbar sum with x1 and x2 inputs
 /////////////////////////////////////////////////////////////////////////
 
-double pdf_sum_qqbar_charge_weighted(double x, double tau_over_z){
+double pf_sum_qqbar_charge_weighted(double x1, double x2){
 	double sum_pdf(0);
 	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
-	if(x < tau_over_z){return 0;}
 	for(int i = 1; i <=5; i++){
-		sum_pdf+= eq[i-1]*eq[i-1]*1./x*1./(tau_over_z/x)*(pdfs[0]->xfxQ(i,x,muF)*pdfs[0]->xfxQ(-i,tau_over_z/x,muF)+pdfs[0]->xfxQ(i,tau_over_z/x,muF)*pdfs[0]->xfxQ(-i,x,muF));
+		sum_pdf+= eq[i-1]*eq[i-1]*(pdfs[0]->xfxQ(i,x1,muF)*pdfs[0]->xfxQ(-i,x2,muF)+pdfs[0]->xfxQ(i,x2,muF)*pdfs[0]->xfxQ(-i,x1,muF));
 		//cout << "in the sum " << sum_pdf << endl;
 	}
-	return 1./x*sum_pdf;
+	return sum_pdf;
 }
-
-
-
+/*
 /////////////////////////////////////////////////////////////////////////
 /// this is the qqbar sum with normal x and tau/z inputs for the integral
 /// int[1/x*f_1(x,Q)*f_2(tau/(z*x),Q),{x,tau/z,1}]
@@ -288,3 +286,4 @@ double vegas_pdf_mom_consv(double *k, size_t dim, void *params){
 	sum_pdf+=pdfs[0]->xfxQ(21,k[0],muF);
 	return sum_pdf;
 }
+*/

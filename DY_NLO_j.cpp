@@ -9,7 +9,6 @@
 using namespace std;
 using namespace LHAPDF;
 
-
 // Integration parameters for CUBA
 
 #define NDIM1 1
@@ -62,7 +61,7 @@ double Q, S, tau, muf, mur, as;
 
 double prefactor(double totMass, double phMass){
     // Given in units of pb/GeV^2, appropriate for dsigma/dQ^2
-    
+
     double aem = 1./132.507;
     double r =  pbunits*4.*pi*pow(aem,2)/(3.*Nc*pow(phMass,2)*totMass);
     return r;
@@ -92,7 +91,7 @@ static int Dpart1(const int *ndim, const cubareal xx[],
     #define z_var xx[1]
     #define x_var xx[0]
     #define dpart1 ff[0]
-    
+
     double zmax = 1.;
     double zmin = tau;
     double jacz = zmax-zmin;
@@ -108,7 +107,7 @@ static int Dpart2(const int *ndim, const cubareal xx[],
 #define z_var xx[1]
 #define x_var xx[0]
 #define dpart2 ff[0]
-    
+
     double zmax = tau;
     double zmin = 0.;
     double jacz = zmax-zmin;
@@ -123,12 +122,12 @@ static int Lterms(const int *ndim, const cubareal xx[],
 #define z_var xx[1]
 #define x_var xx[0]
 #define lterms ff[0]
-    
+
     double zmax = 1.;
     double zmin = tau;
     double jacz = zmax-zmin;
     double z = zmin + jacz* z_var;
-    
+
     lterms = prefactor(S,Q)*as/(4.*pi)*CF*(-8*(1+z)*log(1-z)-4*(1+pow(z,2))/(1-z)*log(z))*jacz*partonLum(x_var, tau/z, 1., Q)/z;
     return 0;
 }
@@ -138,7 +137,7 @@ static int deltaZ(const int *ndim, const cubareal xx[],
                  const int *ncomp, cubareal ff[], void *userdata) {
 #define x_var xx[0]
 #define delta ff[0]
-    
+
     // Add for full result: 6*log(pow(Q,2)/pow(muf,2))
     delta = prefactor(S,Q)*(1+ as/(4*pi)*CF*(8*zeta2 - 16))*partonLum(x_var, tau, 1, Q);
     return 0;
@@ -180,12 +179,12 @@ static int derNLO(const int *ndim, const cubareal xx[],
 #define z_var xx[1]
 #define x_var xx[0]
 #define dernlo ff[0]
-    
+
     double zmax = 1.;
     double zmin = tau;
     double jacz = zmax-zmin;
     double z = zmin + jacz* z_var;
-    
+
     dernlo = prefactor(S,Q)*(1 + as/(4*pi)*CF*(8*zeta2 - 16 + 8*pow(log(1-z),2) - 2*(1-z)*(-7 - z + 2*(3+z)*log(1-z))
  - 5 + 4*z + pow(z,2) - 2*z*(2+z)*log(z) + 8*gsl_sf_dilog(1-z)))*jacz*partonLumDer(x_var, z, Q, 0.00001);
     return 0;
@@ -193,13 +192,13 @@ static int derNLO(const int *ndim, const cubareal xx[],
 
 
 int main(){
-    
+
 // Load PDFset
     initPDFSet("NNPDF31_nnlo_as_0118", LHGRID);
 //    initPDFSet("MSTW2008nnlo90cl", LHGRID);
-    
+
     usePDFMember(0);
-    
+
 // Set parameters
     Q = 500.;
     S = pow(13000.,2);
@@ -216,38 +215,38 @@ int main(){
     double params[1];
 
 // Integration
- 
+
     Vegas(NDIM2, NCOMP, Dpart1  , params,
           NVEC, EPSREL, EPSABS, verbose, SEED,
           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
           GRIDNO, STATEFILE, &spin, &neval, &fail, integral, error, prob);
     double Dpart1res = integral[0];
     double Dpart1er = error[0];
-    
+
     Vegas(NDIM2, NCOMP, Dpart2  , params,
           NVEC, EPSREL, EPSABS, verbose, SEED,
           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
           GRIDNO, STATEFILE, &spin, &neval, &fail, integral, error, prob);
     double Dpart2res = integral[0];
     double Dpart2er = error[0];
-    
+
     double Dtermsres = Dpart1res + Dpart2res;
     double Dtermser = Dpart1er + Dpart2er;
-    
+
     Vegas(NDIM2, NCOMP, Lterms  , params,
           NVEC, EPSREL, EPSABS, verbose, SEED,
           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
           GRIDNO, STATEFILE, &spin, &neval, &fail, integral, error, prob);
     double Ltermsres = integral[0];
     double Ltermser = error[0];
-    
+
     Vegas(NDIM1, NCOMP, deltaZ  , params,
           NVEC, EPSREL, EPSABS, verbose, SEED,
           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
           GRIDNO, STATEFILE, &spin, &neval, &fail, integral, error, prob);
     double zdelta = integral[0];
     double deltaer = error[0];
-    
+
     Vegas(NDIM2, NCOMP, subLP  , params,
           NVEC, EPSREL, EPSABS, verbose, SEED,
           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
@@ -258,32 +257,32 @@ int main(){
     double NLPer = error[0];
     double NNLPer = error[1];
     double N3LPer = integral[2];
-    
+
     // Derivative approach; full NLO result
-    
+
     Vegas(NDIM2, NCOMP, derNLO, params,
           NVEC, EPSREL, EPSABS, verbose, SEED,
           MINEVAL, MAXEVAL, NSTART, NINCREASE, NBATCH,
           GRIDNO, STATEFILE, &spin, &neval, &fail, integral, error, prob);
     double derApp = integral[0];
     double derApper = error[0];
-    
 
-    
+
+
 
 
 // Output
-    
+
     cout << "===========================================================================" << endl;
     cout << endl << "dsigma/dQ^2 for DY @ NLO" << endl <<endl;
     cout << "===========================================================================" << endl;
-    
+
     cout << endl << "PARAMETERS" << endl ;
     cout << "..........................................................................." << endl;
     cout << "S = " << S << " GeV^2" << endl<< "Q = " << Q << " GeV" << endl << "tau = " << tau << endl << "tau*sigma_0 = "<< prefactor(S,Q) << endl;
-    
+
     cout << "---------------------------------------------------------------------------" << endl;
-    
+
     cout << endl << "RESULTS" << endl;
     cout << "..........................................................................." << endl;
     cout << "Logs and distributions: " << Dtermsres+Ltermsres << " pb/GeV^2 (" << Dtermser+Ltermser <<")" << endl <<endl;
@@ -293,7 +292,7 @@ int main(){
     cout << endl << "Total derivative approach: " << derApp << " pb/GeV^2 (" << derApper << ")" << endl;
 
     cout << "---------------------------------------------------------------------------" << endl;
-    
+
     cout << endl << "POWER EXPANSION" << endl;
     cout << "..........................................................................." << endl;
     cout << "LP: " << Dtermsres  << " pb/GeV^2 (" << Dtermser  << ")"  << endl;

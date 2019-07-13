@@ -3,6 +3,9 @@
 #include <sstream>
 #include <unistd.h> //for getting options
 #include <gsl/gsl_math.h>
+#include <complex>
+#include <gsl/gsl_complex.h>
+#include <gsl/gsl_complex_math.h>
 #include <stdlib.h> // for exit()
 #include <getopt.h> //for getting options
 #include <vector>
@@ -14,11 +17,14 @@ using namespace std;
 ///
 /// parameters.cpp contains the functions to read in the parameters
 /// that are used in the code and unchanged
-/// contains stuff like invariant mass, com energy, tau, color 
+/// contains stuff like invariant mass, com energy, tau, color
 /// factors and the electromagnetic coupling constant
 ///
 //////////////////////////////////////////////////////////////////
 
+
+complex<double> I(0,1);
+double CMP(2.5), phiMP(3./4.*M_PI);
 double Q(500.);
 double Q2(pow(Q,2.));
 double S(13000.);
@@ -37,6 +43,7 @@ double alphas_muF(0);
 double alphas_muR(0);
 double alphas_Q(0);
 double nF(5);
+double b0(11*CA/3.-2*nF/3.);
 double zeta2(1.6449340668482264);
 double zeta3(1.2020569031595942);
 double pbunits(0.38937966*pow(10.,9.));
@@ -106,7 +113,7 @@ void read_arguments(int argc, char* argv[]) {
       Q = strtod(optarg, NULL);
       Q2 = pow(Q,2);
       muF = Q;
-      muR = Q; 
+      muR = Q;
       muF2 = muF*muF;
       muR2 = muR*muR;
       break;
@@ -121,4 +128,3 @@ void read_arguments(int argc, char* argv[]) {
   tau = Q2/S2; //reset tau
   return;
 }
-

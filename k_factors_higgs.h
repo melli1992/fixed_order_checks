@@ -13,31 +13,25 @@ double vegas_higgs_LO(double *k, size_t dim, void *params);
 //needed for gg
 double vegas_higgs_NLO_gg_LP(double *k, size_t dim, void *params);
 double vegas_higgs_NLO_gg_LP_corr(double *k, size_t dim, void *params);
-double vegas_higgs_NLO_gg_NLP(double *k, size_t dim, void *params);
-double vegas_higgs_NLO_gg_NNLP(double *k, size_t dim, void *params);
-double vegas_higgs_NLO_gg_NNNLP(double *k, size_t dim, void *params);
 double vegas_higgs_NLO_gg_full(double *k, size_t dim, void *params);
 double vegas_higgs_NLO_gg_delta(double *k, size_t dim, void *params);
+double vegas_higgs_NLO_gg_power(double *k, size_t dim, void *params);
 double higgs_NLO_gg_LP(double x);
 double higgs_NLO_gg_delta();
-double higgs_NLO_gg_NLP(double x);
-double higgs_NLO_gg_NNLP(double x);
-double higgs_NLO_gg_NNNLP(double x);
 double higgs_NLO_gg_full(double x);
+double higgs_NLO_gg_expansion(double x, int power);
 
 //needed for qg
-double vegas_higgs_NLO_qg_NLP(double *k, size_t dim, void *params);
-double vegas_higgs_NLO_qg_NNLP(double *k, size_t dim, void *params);
-double vegas_higgs_NLO_qg_NNNLP(double *k, size_t dim, void *params);
 double vegas_higgs_NLO_qg_full(double *k, size_t dim, void *params);
-double higgs_NLO_qg_NLP(double x);
-double higgs_NLO_qg_NNLP(double x);
-double higgs_NLO_qg_NNNLP(double x);
+double vegas_higgs_NLO_qg_power(double *k, size_t dim, void *params);
 double higgs_NLO_qg_full(double x);
+double higgs_NLO_qg_expansion(double x, int power);
 
 
 //needed for qqbar
 double vegas_higgs_NLO_qqbar_full(double *k, size_t dim, void *params);
+double vegas_higgs_NLO_qqbar_power(double *k, size_t dim, void *params);
 double higgs_NLO_qqbar_full(double x);
+double higgs_NLO_qqbar_expansion(double x, int power);
 
 #endif
