@@ -2,8 +2,10 @@
 #include <iostream>
 #include <fstream>
 #include "cuba.h"
+#include <sstream>
 #include "deriv_pdf.h"
 #include "monte_carlo.h"
+#include "mellin_pdf.h"
 #include "k_factors_dy.h"
 #include "k_factors_higgs.h"
 #include "k_factors_nnlo_dy.h"
@@ -15,6 +17,7 @@
 #include <gsl/gsl_sf_fermi_dirac.h>
 #include <gsl/gsl_sf_zeta.h>
 #include <gsl/gsl_sf_dilog.h>
+#include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_monte.h>
 #include <gsl/gsl_monte_vegas.h>
 #include <string.h>
@@ -41,27 +44,30 @@ int main(int argc, char* argv[]){
 	//////////////////////////////////////////////
 	/// predefinition of everything, setting it up
 	//////////////////////////////////////////////
-  read_arguments(argc,argv);
-	LHAPDF::PDFSet setk(setname);
-	print_defaults();
-	int nmem(0.); //number of members
-	vector<int> pids; //number of flavors, span from -5 to 5 with 0 = 21 gluon
-	nmem = setk.size()-1;
-	pdfs = setk.mkPDFs();
-	pids = pdfs[0]->flavors();
-	xmin_pdfs = pdfs[0]->xMin();
-	xmax_pdfs = pdfs[0]->xMax();
-	alphas_muF = pdfs[0]->alphasQ(muF);
-	alphas_Q = pdfs[0]->alphasQ(Q);
-	alphas_muR = pdfs[0]->alphasQ(muR);
-	cout << "alphas_Q " << alphas_Q << endl;
-	cout << "alphas_muF " << alphas_muF << endl;
-	cout << "alphas_muR " << alphas_muR << endl;
+    read_arguments(argc,argv);
+    // check whether the factorization scale is there
+    unordered_map<double, vector<vector<double>>>::const_iterator got = fitcoeff.find(muF);
+	if ( got == fitcoeff.end() ){
+		cout << "Setname " << setname <<" is not implemented with factorization scale ";
+		cout << "mu_F="<<muF<<"GeV" << endl;
+		cout << "Exiting program" << endl;
+		exit(0);
+		return 0;
+	}
+	// print of beginning of programme
+	update_defaults();
+	// converting the scales to strings, need it for the file names
+	ostringstream x_convert;
+	x_convert << Q;
+	string Qstring  = x_convert.str();
+	x_convert << alphas_Q;
+	string asstring  = x_convert.str();
 	double z;
 	double eta = 1.5;
 	lumni_params params = {z, Q, 2*Q/S, exp(eta), exp(-eta), 0,0,0};
 	params.z = 0.5;
 	///////////////
+	
 	bool DY = false, higgs = false, PF = true;
 	bool TEST=true;
 	//LO
@@ -81,7 +87,7 @@ int main(int argc, char* argv[]){
 	bool NNLO = true;
 	results res_NNLO_qqbar_hard, res_NNLO_qqbar_LP_part1, res_NNLO_qqbar_LP_cor, res_NNLO_qqbar_LPint, res_NNLO_qqbar_NLP, res_NNLO_qqbar_NNLP,res_NNLO_qqbar_NNNLP,res_NNLO_qqbar_delta, res_NNLO_qqbar_LP, res_NNLO_qqbar_full, res_NNLO_qg_full,res_NNLO_qg_NLP,res_NNLO_qg_NNLP,res_NNLO_qg_NNNLP, res_NNLO_gg_full,res_NNLO_gg_NLP,res_NNLO_gg_NNLP,res_NNLO_gg_NNNLP, res_NNLO_qq_full,res_NNLO_qq_NLP,res_NNLO_qq_NNLP,res_NNLO_qq_NNNLP, res_NNLO_qqbarNI_full,res_NNLO_qqbarNI_NLP,res_NNLO_qqbarNI_NNLP,res_NNLO_qqbarNI_NNNLP,res_NNLO_qqNI_full,res_NNLO_qqNI_NLP,res_NNLO_qqNI_NNLP,res_NNLO_qqNI_NNNLP,res_NNLO_qbarqbarNI_full,res_NNLO_qbarqbarNI_NLP,res_NNLO_qbarqbarNI_NNLP,res_NNLO_qbarqbarNI_NNNLP,res_NNLO_qbarqbar_full,res_NNLO_qbarqbar_NLP,res_NNLO_qbarqbar_NNLP,res_NNLO_qbarqbar_NNNLP;
 	ofstream output;
-	string q_str = "2output_Q" + to_string(Q) +"_as"+to_string(alphas_Q)+"_"+setname;
+	string q_str = "2output_Q" + Qstring +"_as"+asstring+"_"+setname;
 	if(DY) q_str = q_str+"_DY";
 	if(higgs) q_str = q_str+"_Higgs";
 	if(LO) q_str = q_str+"_LO";
@@ -91,46 +97,63 @@ int main(int argc, char* argv[]){
 	output.open(q_str.c_str()); //.c_str() needed to do a constant string conversion
 	//////////////////////////////////////////////
     ofstream output2;
-	output2.open("mellinDY.out");
-  for(int i = 0; i < 10; i ++)
-	{
-		for(int j = 0; j < 2; j++){
-			results out1, out2, out3, out4, out5, out6, out7,out8;
-			CMP = 2.0+i*0.2;
-			phiMP = (0.5+j*0.1)*M_PI;
-			/*out1 = call_vegas(init_vegas_mellin("full"),params);
-			out2 = call_vegas(init_vegas_mellin("deriv"),params);
-			out3 = call_vegas(init_vegas_mellin("defor"),params);
-			out4 = call_vegas(init_vegas_mellin("nspace"),params);*/
-			out5 = call_vegas(init_vegas_mellin("LOnul"),params);
-		  out6 = call_vegas(init_vegas_mellin("LOderiv"),params);
-		  out7 = call_vegas(init_vegas_mellin("LOdefor"),params);
- 		  out8 = call_vegas(init_vegas_mellin("resumdefor"),params);
-			cout << "CMP = " << CMP << " phi = " << phiMP << endl;
-			/*cout << "as is = " << out1.res << " " << out1.err << endl;
-			cout << "deriv = " <<  out2.res << " " << out2.err << endl;
-			cout << "deformation = " << out3.res << " " << out3.err << endl;
-			cout << "n space = " <<  out4.res << " " << out4.err << endl;
-			output2 << "CMP = " << CMP << " phi = " << phiMP << endl;
-			output2 << "as is = " << out1.res << " " << out1.err << endl;
-			output2 << "deriv = " <<  out2.res << " " << out2.err << endl;
-			output2 << "deformation = " << out3.res << " " << out3.err << endl;
-			output2 << "n space = " <<  out4.res << " " << out4.err << endl;*/
-			cout << out5.res << " " << out5.err << endl;
-			cout << out6.res << " " << out6.err << endl;
-			cout << out7.res << " " << out7.err << endl;
-			cout << out8.res << " " << out8.err << endl;
-			output2 << "true = " << out5.res << " " << out5.err << endl;
-			output2 << "deriv = " << out6.res << " " << out6.err << endl;
-			output2 << "deform = " << out7.res << " " << out7.err << endl;
-			output2 << "resum = " << out8.res << " " << out8.err << endl;
-	//		output2 << "n space = " <<  out6.res << " " << out6.err << endl;
-			output2 << "=======" << endl;
+	output2.open("DY_resummed_without_NLP.out");
+	double scales[17] = {5000,2500,2000,1500,1000,750,500,400,300,200,150,125,100,75,50,25,10}; 
+	//double scales[17] = {25,10}; 
+	for(int i = 0; i < 17; i++){
+		Q = scales[i];
+		muF = Q;
+		muR = Q;
+		update_defaults();
+		output2 << "======================================================" << endl;
+		output2 << "======================================================" << endl;
+		output2 << "alphas(Q)=" << alphas_Q << ", Q=" << Q << "GeV , tau=" << tau << endl;
+	    for(int i = 0; i < 2; i ++){
+			for(int j = 0; j < 2; j++){
+				results out1, out2, out3, out4, out5, out6, out7,out8;
+				CMP = 2.0+i*0.2;
+				phiMP = (0.5+j*0.1)*M_PI;
+				/*out1 = call_vegas(init_vegas_mellin("full"),params);
+				out2 = call_vegas(init_vegas_mellin("deriv"),params);
+				out3 = call_vegas(init_vegas_mellin("defor"),params);
+				out4 = call_vegas(init_vegas_mellin("nspace"),params);
+				*/
+				cout << "Computing LOtrue" << endl;
+				out5 = call_vegas(init_vegas_mellin("LOtrue"),params);
+				cout << "Computing LOfit" << endl;
+				out6 = call_vegas(init_vegas_mellin("LOfit"),params);
+				cout << "Computing exact" << endl;
+				out7 = call_vegas(init_vegas_mellin("LOexact"),params);
+				cout << "Computing resum" << endl;
+				out8 = call_vegas(init_vegas_mellin("resum"),params);
+				cout << "CMP = " << CMP << " phi = " << phiMP << endl;
+			  /*
+				
+				cout << "as is = " << out1.res << " " << out1.err << endl;
+				cout << "deriv = " <<  out2.res << " " << out2.err << endl;
+				cout << "deformation = " << out3.res << " " << out3.err << endl;
+				cout << "n space = " <<  out4.res << " " << out4.err << endl;
+				output2 << "CMP = " << CMP << " phi = " << phiMP << endl;
+				output2 << "as is = " << out1.res << " " << out1.err << endl;
+				output2 << "deriv = " <<  out2.res << " " << out2.err << endl;
+				output2 << "deformation = " << out3.res << " " << out3.err << endl;
+				output2 << "n space = " <<  out4.res << " " << out4.err << endl;*/
+				cout << "LOtrue: " << out5.res << " " << out5.err << endl;
+				cout << "LOfit: " <<  out6.res << " " << out6.err << endl;
+				cout << "Exact: " <<  out7.res << " " << out7.err << endl;
+				cout << "Resum(withoutNLP): " << out8.res << " " << out8.err << endl;
+				output2 << "=======" << endl;
+				output2 << "CMP: " << CMP << ", phiMP: " << phiMP << endl;
+				output2 << "LOtrue: " << out5.res << " " << out5.err << endl;
+				output2 << "LOfit: " <<  out6.res << " " << out6.err << endl;
+				output2 << "Exact: " <<  out7.res << " " << out7.err << endl;
+				output2 << "Resum(withoutNLP): " << out8.res << " " << out8.err << endl;
+			}
 		}
 	}
 	exit(0);
 	if(TEST && DY){
-		string q_str = "test_values_" + to_string(Q) +"_as"+to_string(alphas_Q)+"_"+setname+".txt";
+		string q_str = "test_values_" + Qstring +"_as"+asstring+"_"+setname+".txt";
 		ofstream output2;
 		output2.open(q_str.c_str()); //.c_str() needed to do a constant string conversion
 		cout << "---------- TESTING PARAMETERS -----------" << endl;
@@ -179,7 +202,7 @@ int main(int argc, char* argv[]){
 	}
 
 	if(TEST && higgs){
-		string q_str = "test_values_" + to_string(Q) +"_as"+to_string(alphas_Q)+"_"+setname+"_higgs.txt";
+		string q_str = "test_values_" + Qstring +"_as"+asstring+"_"+setname+"_higgs.txt";
 		ofstream output2;
 		output2.open(q_str.c_str()); //.c_str() needed to do a constant string conversion
 		cout << "---------- TESTING PARAMETERS -----------" << endl;

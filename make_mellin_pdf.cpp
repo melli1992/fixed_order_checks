@@ -17,7 +17,7 @@
 #include <gsl/gsl_sf_dilog.h>
 #include <gsl/gsl_monte.h>
 #include <gsl/gsl_monte_vegas.h>
-#include <string.h>
+#include <string>
 #include <sstream>
 #include <unordered_map>
 #include "polygamma.h"
@@ -39,39 +39,12 @@ double polylog(int s, double z){
 
 
 int main(int argc, char* argv[]){
-
-	std::unordered_map<double, vector<vector<double>>> u = {
-		{100,{{1},{2},{3}}},
-			{500,{{2},{4},{5}}},
-			{1000,{{3},{3},{4}}}
-			/*  {100,{1,2,3,4}},
-				{500,{1,2,3,4}},
-				{1000,{1,2,3,4}} */
-		};
-
-		cout << u[100][0][0] << endl;
-		cout << u[100][1][0] << endl;
-    // Iterate and print keys and values of unordered_map
-  //  for( const auto& n : u ) {
-  //      std::cout << "Key:[" << n.first << "] Value:[" << n.second << "]\n";
-  //  }
-		//////////////////////////////////////////////
+	//////////////////////////////////////////////
 	/// predefinition of everything, setting it up
 	//////////////////////////////////////////////
-	/*std::unordered_map<double,vector<double> > fitcoefficients = {
-        {100,{1,2,3,4}},
-        {500,{1,2,3,4}},
-        {1000,{10,20,30,40}}
-    };
-	for( const auto& n : fitcoefficients) {
-	        std::cout << "Key:[" << n.first << "] Value:[" << n.second << "]\n";
-	    }
-	cout << fitcoefficients[100] << endl;*/
-
-
 	read_arguments(argc,argv);
 	LHAPDF::PDFSet setk(setname);
-	print_defaults();
+	update_defaults();
 	int nmem(0.); //number of members
 	vector<int> pids; //number of flavors, span from -5 to 5 with 0 = 21 gluon
 	nmem = setk.size()-1;
@@ -85,22 +58,25 @@ int main(int argc, char* argv[]){
 	cout << "alphas_Q " << alphas_Q << endl;
 	cout << "alphas_muF " << alphas_muF << endl;
 	cout << "alphas_muR " << alphas_muR << endl;
-	S12(1.-0.1);
 	double z;
 	double eta = 1.5;
 	lumni_params params = {z, Q, 2*Q/S, exp(eta), exp(-eta), 0,0,0};
 	params.z = 0.5;
 	///////////////
-	/*ofstream output, output2;
-	string q_str = "fit_pdfs/2muF" + to_string(Q) +"_as"+to_string(alphas_Q)+"_"+setname;
-	string q2_str = "fit_pdfs/muF" + to_string(Q) +"_"+setname;
+	ofstream output, output2;
+	ostringstream x_convert;
+	x_convert << Q;
+	string Qstring  = x_convert.str();
+	x_convert << alphas_Q;
+	string asstring  = x_convert.str();
+	//string q2_str = "fit_pdfs/"+setname+"/muF" + Qstring +"_"+setname;
+	string q2_str = "fit_pdfs/"+setname+"/muF" + to_string((float) Q) +"_"+setname;
+	
 	q2_str = q2_str + "_pdfoutput.txt";
-	q_str = q_str + "_coefficients.txt";
-	output.open(q_str.c_str());
+	
 	output2.open(q2_str.c_str()); //.c_str() needed to do a constant string conversion
 	output2 << "x xf(x) f(x)" << endl;
 	//////////////////////////////////////////////
-    cout << q_str << endl;
     cout << q2_str << endl;
     for(int flav = -5; flav < 6; flav++)
 	{
@@ -127,19 +103,7 @@ int main(int argc, char* argv[]){
 			}
 			++counter;
 		}
-		output << "muF=" << muF <<" GeV, flavor=" << flav << endl;
-		/*for(int i = 0; i < 50; i++)
-		{
-			cout << "computing a_"<<i << endl;
-			results out1;
-			params.coefficient = i;
-			if(flav!=0){params.flavor =flav;}
-			else if(flav==0){params.flavor =21;}
-			out1 = call_vegas(init_vegas_coefficients(params.coefficient),params,false,true);
-			cout << "a_"<< params.coefficient << " " << out1.res << " " << out1.err << endl;
-		}
 	}
 	output2.close();
-	output.close();*/
 	return 0;
 }

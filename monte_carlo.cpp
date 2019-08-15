@@ -30,27 +30,6 @@ void display_results(string title, double &result, double &error){
 }
 
 
-
-/////////////////////////////////////////////////////////
-/// initializes the function for the mellin coefficients
-/////////////////////////////////////////////////////////
-functionint init_vegas_coefficients(int n){
-	functionint integrand;
-	if(n==0){
-					integrand.G.f =&vegas_coefficients_0;
-					integrand.G.dim = 1;
-					integrand.xl = {-1.};
-					integrand.xu = {1.};
-				}
-	else{
-								integrand.G.f =&vegas_coefficients_n;
-								integrand.G.dim = 1;
-								integrand.xl = {-1.};
-								integrand.xu = {1.};
-							}
-	return integrand;
-}
-
 /////////////////////////////////////////////////////////
 /// initializes the function to integrate in the photon case
 /////////////////////////////////////////////////////////
@@ -80,31 +59,41 @@ functionint init_vegas_mellin(std::string process, double cmp_set, double phi_se
 							integrand.xl = {0.};
 							integrand.xu = {1.};
 						}
-			else if (process == "LOnul"){
+			else if (process == "LOtrue"){
+							integrand.G.f =&vegas_sigma0_true;
+							integrand.G.dim = 1;
+							integrand.xl = {tau};
+							integrand.xu = {1.};
+						}
+			else if (process == "LOfit"){
 							integrand.G.f =&vegas_sigma0_nomel;
 							integrand.G.dim = 1;
 							integrand.xl = {tau};
 							integrand.xu = {1.};
-							//integrand.xl = {-1.,-1.};
-							//integrand.xu = {0,0};
+						}
+			else if (process == "LOexact"){
+							integrand.G.f =&vegas_sigma0_exact;
+							integrand.G.dim = 1;
+							integrand.xl = {0.};
+							integrand.xu = {1.};
 						}
 			else if (process == "LOderiv"){
 							integrand.G.f =&vegas_sigma0_deriv;
-							integrand.G.dim = 3;
-							integrand.xl = {0.,0.,0.};
-							integrand.xu = {1.,1.,1.};
+							integrand.G.dim = 2;
+							integrand.xl = {0.,0.};
+							integrand.xu = {1.,1.};
 						}
 				else if (process == "LOdefor"){
 								integrand.G.f =&vegas_sigma0_defor;
-								integrand.G.dim = 3;
-								integrand.xl = {0.,-1.,-1.};
-								integrand.xu = {1.,0.,0.};
+								integrand.G.dim = 2;
+								integrand.xl = {0.,-1.};
+								integrand.xu = {1.,0.};
 							}
-					else if (process == "resumdefor"){
+					else if (process == "resum"){
 									integrand.G.f =&vegas_resum_defor;
-									integrand.G.dim = 3;
-									integrand.xl = {0.,-1.,-1.};
-									integrand.xu = {1.,0.,0.};
+									integrand.G.dim = 1;
+									integrand.xl = {0.};
+									integrand.xu = {1.};
 								}
 	return integrand;
 }

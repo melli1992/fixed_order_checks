@@ -1,3 +1,4 @@
+#include <bits/stdc++.h>
 #include <iostream>
 #include <fstream>
 #include <complex>
@@ -34,17 +35,37 @@ extern double alphaEM;
 extern double GF;
 extern double nF;
 extern double zeta2;
-extern double b0;
 extern double zeta3;
+extern double zeta5;
+extern double b0;
+extern double beta0;
+extern double b1;
+extern double A1q;
+extern double A1g;
+extern double A2q;
+extern double A2g;
+extern double A3q;
+extern double A3g;
+extern double B1q;
+extern double B1g;
+extern double C2qgamma;
+extern double Dbar2q;
+extern double D1DY;
+extern double D2DY;
+extern double D3DY;
+extern double D1higgs;
+extern double D2higgs;
+extern double D3higgs;
 extern double pbunits;
+extern double M_gammaE;
 extern std::string setname;
 extern std::vector<LHAPDF::PDF*> pdfs; //pdf vector
 extern double xmin_pdfs, xmax_pdfs; //min x, max x
 
 struct lumni_params {double z; double pT; double xT; double epeta; double emeta; int power; int flavor; int coefficient;};
 void print_usage();
-void print_defaults();
+void update_defaults();
 void read_arguments(int argc, char* argv[]);
 
-
+extern std::unordered_map<double, std::vector<std::vector<double>>> fitcoeff;
 #endif

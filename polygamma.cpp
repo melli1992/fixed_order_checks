@@ -4,6 +4,7 @@
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
 #include <gsl/gsl_sf_dilog.h>
+#include <gsl/gsl_sf_gamma.h>
 #include <vector>
 #include "polygamma.h"
 #include <iostream>
@@ -73,4 +74,12 @@ double clenshaw(vector<double> coeff, double x){
 	
 	return coeff[0]+x*bk-bkp;
 	
+}
+
+complex<double> Gamma(complex<double> x){
+	gsl_sf_result lnr;
+	gsl_sf_result arg;
+	complex<double> I(0,1);
+	gsl_sf_lngamma_complex_e(real(x),imag(x),&lnr, &arg);
+	return exp(lnr.val+I*arg.val);
 }
