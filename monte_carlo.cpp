@@ -9,6 +9,7 @@
 #include "deriv_pdf.h"
 #include "k_factors_dy.h"
 #include "k_factors_higgs.h"
+#include "k_factors_nnlo_higgs.h"
 #include "k_factors_nnlo_dy.h"
 #include "k_factors_prompt_photon.h"
 #include "mellin_functions.h"
@@ -30,71 +31,122 @@ void display_results(string title, double &result, double &error){
 }
 
 
-/////////////////////////////////////////////////////////
-/// initializes the function to integrate in the photon case
-/////////////////////////////////////////////////////////
-functionint init_vegas_mellin(std::string process, double cmp_set, double phi_set){
+//////////////////////////////////////////////////////////////////////
+/// initializes the function to integrate in the resummed cases
+//////////////////////////////////////////////////////////////////////
+functionint init_vegas_mellin(std::string process, std::string order){
 	functionint integrand;
-			if (process == "full"){
-					integrand.G.f =&vegas_fofx2_full;
-					integrand.G.dim = 2;
-					integrand.xl = {0.,0.};
-					integrand.xu = {1.,1.};
-				}
-		  else if (process == "deriv"){
-						integrand.G.f =&vegas_fofx2_deriv;
-						integrand.G.dim = 2;
-						integrand.xl = {0.,0.};
-						integrand.xu = {1.,1.};
-					}
-			else if (process == "defor"){
-							integrand.G.f =&vegas_fofx2_defor;
-							integrand.G.dim = 2;
-							integrand.xl = {0.,-1.};
-							integrand.xu = {1.,0.};
-						}
-			else if (process == "nspace"){
-							integrand.G.f =&vegas_fofx2_Nspace;
-							integrand.G.dim = 1;
-							integrand.xl = {0.};
-							integrand.xu = {1.};
-						}
-			else if (process == "LOtrue"){
-							integrand.G.f =&vegas_sigma0_true;
-							integrand.G.dim = 1;
-							integrand.xl = {tau};
-							integrand.xu = {1.};
-						}
-			else if (process == "LOfit"){
-							integrand.G.f =&vegas_sigma0_nomel;
-							integrand.G.dim = 1;
-							integrand.xl = {tau};
-							integrand.xu = {1.};
-						}
-			else if (process == "LOexact"){
-							integrand.G.f =&vegas_sigma0_exact;
-							integrand.G.dim = 1;
-							integrand.xl = {0.};
-							integrand.xu = {1.};
-						}
-			else if (process == "LOderiv"){
-							integrand.G.f =&vegas_sigma0_deriv;
-							integrand.G.dim = 2;
-							integrand.xl = {0.,0.};
-							integrand.xu = {1.,1.};
-						}
-				else if (process == "LOdefor"){
-								integrand.G.f =&vegas_sigma0_defor;
-								integrand.G.dim = 2;
-								integrand.xl = {0.,-1.};
-								integrand.xu = {1.,0.};
-							}
-					else if (process == "resum"){
-									integrand.G.f =&vegas_resum_defor;
-									integrand.G.dim = 1;
-									integrand.xl = {0.};
-									integrand.xu = {1.};
-								}
+	if(process == "DY"){
+		if(order == "LOtrue"){
+			integrand.G.f =&vegas_DY_true;
+			integrand.G.dim = 1;
+			integrand.xl = {tau};
+			integrand.xu = {1.};
+		}
+		else if (order == "LOfit"){
+			integrand.G.f =&vegas_DY_fit;
+			integrand.G.dim = 1;
+			integrand.xl = {tau};
+			integrand.xu = {1.};
+		}
+		else if (order == "LOmellin"){
+			integrand.G.f =&vegas_DY_mellin;
+			integrand.G.dim = 1;
+			integrand.xl = {0.};
+			integrand.xu = {1.};
+		}
+		else if (order == "LOderiv"){
+			cout << "still has an error in it!" << endl;
+			exit(0);
+			integrand.G.f =&vegas_DY_deriv;
+			integrand.G.dim = 2;
+			integrand.xl = {0.,0.};
+			integrand.xu = {1.,1.};
+		}
+		else if (order == "LOdefor"){
+			cout << "still has an error in it!" << endl;
+			exit(0);
+			integrand.G.f =&vegas_DY_defor;
+			integrand.G.dim = 2;
+			integrand.xl = {0.,-1.};
+			integrand.xu = {1.,0.};
+		}
+		else if (order == "resum"){
+			integrand.G.f =&vegas_resum_DY;
+			integrand.G.dim = 1;
+			integrand.xl = {0.};
+			integrand.xu = {1.};
+		}
+		else if (order == "resumexpandedNLO"){
+			integrand.G.f =&vegas_resum_DY_expanded_NLO;
+			integrand.G.dim = 1;
+			integrand.xl = {0.};
+			integrand.xu = {1.};
+		}
+		else if (order == "resumexpandedNNLO"){
+			integrand.G.f =&vegas_resum_DY_expanded_NNLO;
+			integrand.G.dim = 1;
+			integrand.xl = {0.};
+			integrand.xu = {1.};
+		}
+		else{cout << "order " << order << " is not implemented" << endl; exit(0);}
+	}
+	else if(process == "higgs"){// higgs implementation
+		if (order == "LOmellin"){
+			integrand.G.f =&vegas_higgs_mellin;
+			integrand.G.dim = 1;
+			integrand.xl = {0.};
+			integrand.xu = {1.};
+		}
+		else if (order == "resum"){
+			integrand.G.f =&vegas_resum_higgs;
+			integrand.G.dim = 1;
+			integrand.xl = {0.};
+			integrand.xu = {1.};
+		}
+		else if (order == "resumexpandedNLO"){
+			integrand.G.f =&vegas_resum_higgs_expanded_NLO;
+			integrand.G.dim = 1;
+			integrand.xl = {0.};
+			integrand.xu = {1.};
+		}
+		else if (order == "resumexpandedNNLO"){
+			integrand.G.f =&vegas_resum_higgs_expanded_NNLO;
+			integrand.G.dim = 1;
+			integrand.xl = {0.};
+			integrand.xu = {1.};
+		}
+		else{cout << "order " << order << " is not implemented" << endl; exit(0);}
+	}
+	else if(process == "test"){ //test cases for full, derivative method, deformation method and the direct N space formula
+		if (process == "full"){
+			integrand.G.f =&vegas_fofx2_full;
+			integrand.G.dim = 2;
+			integrand.xl = {0.,0.};
+			integrand.xu = {1.,1.};
+		}
+		else if (process == "deriv"){
+			integrand.G.f =&vegas_fofx2_deriv;
+			integrand.G.dim = 2;
+			integrand.xl = {0.,0.};
+			integrand.xu = {1.,1.};
+		}
+		else if (process == "defor"){
+			integrand.G.f =&vegas_fofx2_defor;
+			integrand.G.dim = 2;
+			integrand.xl = {0.,-1.};
+			integrand.xu = {1.,0.};
+		}
+		else if (process == "nspace"){
+			integrand.G.f =&vegas_fofx2_Nspace;
+			integrand.G.dim = 1;
+			integrand.xl = {0.};
+			integrand.xu = {1.};
+		}
+	}
+	else{cout << "Process " << process <<" is not implemented" << endl; exit(0);}
+		
+		
 	return integrand;
 }
 
@@ -154,11 +206,12 @@ functionint init_vegas_pf(std::string order, std::string power, std::string proc
 /////////////////////////////////////////////////////////
 /// initializes the function to integrate in the higgs case
 /////////////////////////////////////////////////////////
-functionint init_vegas_higgs(std::string order, std::string power, std::string process, int power_number, bool integrated){
+functionint init_vegas_higgs(std::string order, std::string power, std::string process, int power_number, bool fitted_pdfs){
 	functionint integrand;
 
 	if(order == "LO"){
 	    integrand.G.f =&vegas_higgs_LO;
+	    if(fitted_pdfs)integrand.G.f=&vegas_higgs_LO_fit;
 	    integrand.G.dim=1;
 		integrand.xl = {tau};
 		integrand.xu = {1.};
@@ -167,36 +220,41 @@ functionint init_vegas_higgs(std::string order, std::string power, std::string p
 		if (process == "gg"){
 			if (power_number != 0){
 				integrand.G.f =&vegas_higgs_NLO_gg_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NLO_gg_power_fit;
 				integrand.G.dim = 2;
 				integrand.xl = {tau,0.};
 				integrand.xu = {1.,1.};
 			}
 			else if (power == "LP"){
 				integrand.G.f =&vegas_higgs_NLO_gg_LP;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NLO_gg_LP_fit;
 				integrand.G.dim = 2;
 				integrand.xl = {tau,0.};
 				integrand.xu = {1.,1.};
 			}
 			else if (power == "LP_corr"){
-				integrand.G.f =&vegas_higgs_NLO_gg_LP_corr;
+				integrand.G.f =&vegas_higgs_NLO_gg_zdepcorr;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NLO_gg_zdepcorr_fit;
 				integrand.G.dim = 2;
 				integrand.xl = {0.,0.};
 				integrand.xu = {tau,1.};
 			}
-			else if (power == "full"){
-				integrand.G.f =&vegas_higgs_NLO_gg_full;
+			else if (power == "reg"){
+				integrand.G.f =&vegas_higgs_NLO_gg_zdep;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NLO_gg_zdep_fit;
 				integrand.G.dim = 2;
 				integrand.xl = {tau,0.};
 				integrand.xu = {1.,1.};
 			}
 			else if (power == "delta"){
 				integrand.G.f =&vegas_higgs_NLO_gg_delta;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NLO_gg_delta_fit;
 				integrand.G.dim = 1;
 				integrand.xl = {tau};
 				integrand.xu = {1.};
 				}
 			else{
-				cout << process << " " << integrated << " " << order << " " << power << endl;
+				cout << process  << " " << order << " " << power << " " << power_number << endl;
 				cout << "Wrong power (non-int) specified" << endl;
 				exit(0);
 			}
@@ -204,18 +262,20 @@ functionint init_vegas_higgs(std::string order, std::string power, std::string p
 		else if (process == "qg"){
 			if (power_number != 0){
 				integrand.G.f =&vegas_higgs_NLO_qg_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NLO_qg_power_fit;
 				integrand.G.dim = 2;
 				integrand.xl = {tau,0.};
 				integrand.xu = {1.,1.};
 			}
 			else if (power == "full"){
 				integrand.G.f =&vegas_higgs_NLO_qg_full;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NLO_qg_full_fit;
 				integrand.G.dim = 2;
 				integrand.xl = {tau,0.};
 				integrand.xu = {1.,1.};
 			}
 			else{
-				cout << process << " " << integrated << " " << order << " " << power << endl;
+				cout << process << " " << order << " " << power << " " << power_number << endl;
 				cout << "Wrong power (non-int) specified" << endl;
 				exit(0);
 			}
@@ -223,30 +283,165 @@ functionint init_vegas_higgs(std::string order, std::string power, std::string p
 		else if (process == "qqbar"){
 			if (power_number != 0){
 				integrand.G.f =&vegas_higgs_NLO_qqbar_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NLO_qqbar_power_fit;
 				integrand.G.dim = 2;
 				integrand.xl = {tau,0.};
 				integrand.xu = {1.,1.};
 			}
 			else if (power == "full"){
 				integrand.G.f =&vegas_higgs_NLO_qqbar_full;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NLO_qqbar_full_fit;
 				integrand.G.dim = 2;
 				integrand.xl = {tau,0.};
 				integrand.xu = {1.,1.};
 			}
 			else{
-				cout << process << " " << integrated << " " << order << " " << power << endl;
+				cout << process << " " << order << " " << power << endl;
 				cout << "Wrong power (non-int) specified" << endl;
 				exit(0);
 			}
 		}
 		else{
-			cout << process << " " << integrated << " " << order << " " << power << endl;
+			cout << process << " " << order << " " << power << endl;
+			cout << "Wrong process specified" << endl;
+			exit(0);
+		}
+	}
+	else if (order == "NNLO"){
+		if (process == "gg"){
+			if (power_number != 0){
+				integrand.G.f =&vegas_higgs_NNLO_gg_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_gg_power_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else if (power == "LP"){
+				integrand.G.f =&vegas_higgs_NNLO_gg_LP;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_gg_LP_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else if (power == "LP_corr"){
+				integrand.G.f =&vegas_higgs_NNLO_gg_zdepcorr;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_gg_zdepcorr_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {0.,0.};
+				integrand.xu = {tau,1.};
+			}
+			else if (power == "reg"){
+				integrand.G.f =&vegas_higgs_NNLO_gg_zdep;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_gg_zdep_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else if (power == "delta"){
+				integrand.G.f =&vegas_higgs_NNLO_gg_delta;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_gg_delta_fit;
+				integrand.G.dim = 1;
+				integrand.xl = {tau};
+				integrand.xu = {1.};
+				}
+			else{
+				cout << process << " " << order << " " << power << endl;
+				cout << "Wrong power (non-int) specified" << endl;
+				exit(0);
+			}
+		}
+		else if (process == "qg"){
+			if (power_number != 0){
+				integrand.G.f =&vegas_higgs_NNLO_qg_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_qg_power_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else if (power == "full"){
+				integrand.G.f =&vegas_higgs_NNLO_qg_zdep;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_qg_zdep_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else{
+				cout << process << " " << order << " " << power << endl;
+				cout << "Wrong power (non-int) specified" << endl;
+				exit(0);
+			}
+		}
+		else if (process == "qq"){
+			if (power_number != 0){
+				integrand.G.f =&vegas_higgs_NNLO_qq_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_qq_power_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else if (power == "full"){
+				integrand.G.f =&vegas_higgs_NNLO_qq_zdep;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_qq_zdep_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else{
+				cout << process << " " << order << " " << power << endl;
+				cout << "Wrong power (non-int) specified" << endl;
+				exit(0);
+			}
+		}
+		else if (process == "qqbar"){
+			if (power_number != 0){
+				integrand.G.f =&vegas_higgs_NNLO_qqbar_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_qqbar_power_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else if (power == "full"){
+				integrand.G.f =&vegas_higgs_NNLO_qqbar_zdep;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_qqbar_zdep_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else{
+				cout << process << " " << order << " " << power << endl;
+				cout << "Wrong power (non-int) specified" << endl;
+				exit(0);
+			}
+		}
+		else if (process == "qqp"){
+			if (power_number != 0){
+				integrand.G.f =&vegas_higgs_NNLO_qqp_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_qqp_power_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else if (power == "full"){
+				integrand.G.f =&vegas_higgs_NNLO_qqp_zdep;
+				if(fitted_pdfs)integrand.G.f=&vegas_higgs_NNLO_qqp_zdep_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else{
+				cout << process << " " << order << " " << power << endl;
+				cout << "Wrong power (non-int) specified" << endl;
+				exit(0);
+			}
+		}
+		else{
+			cout << process << " " << order << " " << power << endl;
 			cout << "Wrong process specified" << endl;
 			exit(0);
 		}
 	}
 	else{
-		cout << process << " " << integrated << " " << order << " " << power << endl;
+		cout << process << " " << order << " " << power << endl;
 		cout << "Wrong order specified" << endl;
 		exit(0);
 	}
@@ -256,449 +451,202 @@ functionint init_vegas_higgs(std::string order, std::string power, std::string p
 /////////////////////////////////////////////////////////
 /// initializes the function to integrate in the DY case
 /////////////////////////////////////////////////////////
-functionint init_vegas_dy(std::string order, std::string power, std::string process, bool integrated){
+functionint init_vegas_DY(std::string order, std::string power, std::string process, int power_number, bool fitted_pdfs){
 	functionint integrand;
-
+	cout << "Order " << order << ", power " << power << ", process " << process << ", power_number " << power_number << ", fitted_pdfs " << fitted_pdfs << endl;
 	if(order == "LO"){
-	    integrand.G.f =&vegas_LO;
+	    integrand.G.f =&vegas_DY_LO;
+	    if(fitted_pdfs)integrand.G.f=&vegas_DY_LO_fit;
 	    integrand.G.dim=1;
 		integrand.xl = {tau};
 		integrand.xu = {1.};
 	}
 	else if (order == "NLO"){
 		if (process == "qqbar"){
-			if (integrated == false){
-				if (power == "LP"){
-					integrand.G.f =&vegas_sig_LP_1;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "LP_corr"){
-					integrand.G.f =&vegas_sig_LP_correction;
-					integrand.G.dim = 2;
-					integrand.xl = {0.,0.};
-					integrand.xu = {tau,1.};
-				}
-				else if (power == "NLP"){
-					integrand.G.f =&vegas_sig_NLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNLP"){
-					integrand.G.f =&vegas_sig_NNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				//else if (power == "NNNLP"){integrand.G.f =&vegas_NNLO_qqbar_NNNLP; integrand.G.dim = 2;}
-				else if (power == "full"){
-					integrand.G.f =&vegas_sig_full;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "delta"){
-					integrand.G.f =&vegas_sig_delta;
-					integrand.G.dim = 1;
-					integrand.xl = {tau};
-					integrand.xu = {1.};
-					}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power (non-int) specified" << endl;
-					exit(0);
-				}
+			if (power_number != 0){
+				integrand.G.f =&vegas_DY_NLO_qqbar_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NLO_qqbar_power_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
 			}
+			else if (power == "LP"){
+				integrand.G.f =&vegas_DY_NLO_qqbar_LP;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NLO_qqbar_LP_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else if (power == "LP_corr"){
+				integrand.G.f =&vegas_DY_NLO_qqbar_zdepcorr;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NLO_qqbar_zdepcorr_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {0.,0.};
+				integrand.xu = {tau,1.};
+			}
+			else if (power == "reg"){
+				integrand.G.f =&vegas_DY_NLO_qqbar_zdep;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NLO_qqbar_zdep_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else if (power == "delta"){
+				integrand.G.f =&vegas_DY_NLO_qqbar_delta;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NLO_qqbar_delta_fit;
+				integrand.G.dim = 1;
+				integrand.xl = {tau};
+				integrand.xu = {1.};
+				}
 			else{
-				if (power == "LP"){
-					integrand.G.f =&vegas_sig_LP_int;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NLP"){
-					integrand.G.f =&vegas_sig_NLP_int;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNLP"){
-					integrand.G.f =&vegas_sig_NNLP_int;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "full"){
-					integrand.G.f =&vegas_sig_full_int;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power (int) specified" << endl;
-					exit(0);
-				}
+				cout << process  << " " << order << " " << power << " " << power_number << endl;
+				cout << "Wrong power (non-int) specified" << endl;
+				exit(0);
 			}
+		
 		}
 		else if (process == "qg"){
-			if (integrated == false){
-				if (power == "full1"){
-					integrand.G.f =&vegas_qg_full;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "full"){
-					integrand.G.f =&vegas_NLO_qg_full;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NLP"){
-					integrand.G.f =&vegas_NLO_qg_NLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNLP"){
-					integrand.G.f =&vegas_NLO_qg_NNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNNLP"){
-					integrand.G.f =&vegas_NLO_qg_NNNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power (non int) specified" << endl;
-					exit(0);
-				}
+			if (power_number != 0){
+				integrand.G.f =&vegas_DY_NLO_qg_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NLO_qg_power_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else if (power == "full"){
+				integrand.G.f =&vegas_DY_NLO_qg_full;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NLO_qg_full_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
 			}
 			else{
-				if (power == "full"){
-					integrand.G.f =&vegas_qg_full_int;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power (int) specified" << endl;
-					exit(0);
-				}
+				cout << process << " " << order << " " << power << endl;
+				cout << "Wrong power (non-int) specified" << endl;
+				exit(0);
 			}
 		}
-
 		else{
-			cout << process << " " << integrated << " " << order << " " << power << endl;
-			cout << "Wrong process specified" << endl;
+			cout << process << " " << " " << order << " " << power << endl;
+			cout << "Wrong process specified, does not exist at " << order << endl;
 			exit(0);
 		}
 	}
 	else if (order == "NNLO"){
-		if (integrated == false){
-			if (process == "qqbar"){
-				if (power == "LP"){
-					integrand.G.f =&vegas_NNLO_qqbar_LP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-					}
-				else if (power == "LP_corr"){
-					integrand.G.f =&vegas_NNLO_qqbar_LP_correction;
-					integrand.G.dim = 2;
-					integrand.xl = {0,0.};
-					integrand.xu = {tau,1.};
-					}
-				else if (power == "NLP"){
-					integrand.G.f =&vegas_NNLO_qqbar_NLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-					}
-				else if (power == "NNLP"){
-					integrand.G.f =&vegas_NNLO_qqbar_NNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-					}
-				else if (power == "NNNLP"){
-					integrand.G.f =&vegas_NNLO_qqbar_NNNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-					}
-				else if (power == "full"){
-					integrand.G.f =&vegas_NNLO_qqbar_full;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-					}
-				else if (power == "delta"){
-					integrand.G.f =&vegas_NNLO_qqbar_delta;
-					integrand.G.dim = 1;
-					integrand.xl = {tau};
-					integrand.xu = {1.};
-					}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power specified" << endl;
-					exit(0);
-				}
+		if (process == "qqbar"){
+			if (power_number != 0){
+				integrand.G.f =&vegas_DY_NNLO_qqbar_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NNLO_qqbar_power_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
 			}
-			else if (process == "qg"){
-				if (power == "full"){
-					integrand.G.f =&vegas_NNLO_qg_full;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NLP"){
-					integrand.G.f =&vegas_NNLO_qg_NLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNLP"){
-					integrand.G.f =&vegas_NNLO_qg_NNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNNLP"){
-					integrand.G.f =&vegas_NNLO_qg_NNNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power specified" << endl;
-					exit(0);
-				}
+			else if (power == "LP"){
+				integrand.G.f =&vegas_DY_NNLO_qqbar_LP;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NNLO_qqbar_LP_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
 			}
-			else if (process == "gg"){
-				if (power == "full"){
-					integrand.G.f =&vegas_NNLO_gg_full;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NLP"){
-					integrand.G.f =&vegas_NNLO_gg_NLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNLP"){
-					integrand.G.f =&vegas_NNLO_gg_NNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNNLP"){
-					integrand.G.f =&vegas_NNLO_gg_NNNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power specified" << endl;
-					exit(0);
-				}
+			else if (power == "LP_corr"){
+				integrand.G.f =&vegas_DY_NNLO_qqbar_zdepcorr;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NNLO_qqbar_zdepcorr_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {0.,0.};
+				integrand.xu = {tau,1.};
 			}
-			else if (process == "qq"){
-				if (power == "full"){
-					integrand.G.f =&vegas_NNLO_qq_full;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NLP"){
-					integrand.G.f =&vegas_NNLO_qq_NLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNLP"){
-					integrand.G.f =&vegas_NNLO_qq_NNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNNLP"){
-					integrand.G.f =&vegas_NNLO_qq_NNNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power specified" << endl;
-					exit(0);
-				}
+			else if (power == "reg"){
+				integrand.G.f =&vegas_DY_NNLO_qqbar_zdep;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NNLO_qqbar_zdep_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
 			}
-			else if (process == "qqNI"){
-				if (power == "full"){
-					integrand.G.f =&vegas_NNLO_qqNI_full;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
+			else if (power == "delta"){
+				integrand.G.f =&vegas_DY_NNLO_qqbar_delta;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NNLO_qqbar_delta_fit;
+				integrand.G.dim = 1;
+				integrand.xl = {tau};
+				integrand.xu = {1.};
 				}
-				else if (power == "NLP"){
-					integrand.G.f =&vegas_NNLO_qqNI_NLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNLP"){
-					integrand.G.f =&vegas_NNLO_qqNI_NNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNNLP"){
-					integrand.G.f =&vegas_NNLO_qqNI_NNNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power specified" << endl;
-					exit(0);
-				}
+			else{
+				cout << process  << " " << order << " " << power << " " << power_number << endl;
+				cout << "Wrong power (non-int) specified" << endl;
+				exit(0);
 			}
-			else if (process == "qqbarNI"){
-				if (power == "full"){
-					integrand.G.f =&vegas_NNLO_qqbarNI_full;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NLP"){
-					integrand.G.f =&vegas_NNLO_qqbarNI_NLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNLP"){
-					integrand.G.f =&vegas_NNLO_qqbarNI_NNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNNLP"){
-					integrand.G.f =&vegas_NNLO_qqbarNI_NNNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power specified" << endl;
-					exit(0);
-				}
+		
+		}
+		else if (process == "qg"){
+			if (power_number != 0){
+				integrand.G.f =&vegas_DY_NNLO_qg_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NNLO_qg_power_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
 			}
-			else if (process == "qbarqbarNI"){
-				if (power == "full"){
-					integrand.G.f =&vegas_NNLO_qbarqbarNI_full;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NLP"){
-					integrand.G.f =&vegas_NNLO_qbarqbarNI_NLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNLP"){
-					integrand.G.f =&vegas_NNLO_qbarqbarNI_NNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNNLP"){
-					integrand.G.f =&vegas_NNLO_qbarqbarNI_NNNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power specified" << endl;
-					exit(0);
-				}
-			}
-			else if (process == "qbarqbar"){
-				if (power == "full"){
-					integrand.G.f =&vegas_NNLO_qbarqbar_full;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NLP"){
-					integrand.G.f =&vegas_NNLO_qbarqbar_NLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNLP"){
-					integrand.G.f =&vegas_NNLO_qbarqbar_NNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else if (power == "NNNLP"){
-					integrand.G.f =&vegas_NNLO_qbarqbar_NNNLP;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power specified" << endl;
-					exit(0);
-				}
+			else if (power == "full"){
+				integrand.G.f =&vegas_DY_NNLO_qg_full;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NNLO_qg_full_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
 			}
 			else{
-				cout << process << " " << integrated << " " << order << " " << power << endl;
-				cout << "Wrong process (non-int) specified" << endl;
+				cout << process << " " << order << " " << power << endl;
+				cout << "Wrong power (non-int) specified" << endl;
+				exit(0);
+			}
+		}
+		else if (process == "qq"){
+			if (power_number != 0){
+				integrand.G.f =&vegas_DY_NNLO_qq_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NNLO_qq_power_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else if (power == "full"){
+				integrand.G.f =&vegas_DY_NNLO_qq_full;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NNLO_qq_full_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else{
+				cout << process << " " << order << " " << power << endl;
+				cout << "Wrong power (non-int) specified" << endl;
+				exit(0);
+			}
+		}
+		else if (process == "gg"){
+			if (power_number != 0){
+				integrand.G.f =&vegas_DY_NNLO_gg_power;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NNLO_gg_power_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else if (power == "full"){
+				integrand.G.f =&vegas_DY_NNLO_gg_full;
+				if(fitted_pdfs)integrand.G.f=&vegas_DY_NNLO_gg_full_fit;
+				integrand.G.dim = 2;
+				integrand.xl = {tau,0.};
+				integrand.xu = {1.,1.};
+			}
+			else{
+				cout << process << " " << order << " " << power << endl;
+				cout << "Wrong power (non-int) specified" << endl;
 				exit(0);
 			}
 		}
 		else{
-			if (process == "qqbar"){
-				if (power == "LP"){
-					integrand.G.f =&vegas_NNLO_LP_int;
-					integrand.G.dim = 2;
-					integrand.xl = {tau,0.};
-					integrand.xu = {1.,1.};
-				}
-				else{
-					cout << process << " " << integrated << " " << order << " " << power << endl;
-					cout << "Wrong power (int) specified" << endl;
-					exit(0);
-				}
-			}
-			else{
-				cout << process << " " << integrated << " " << order << " " << power << endl;
-				cout << "Wrong process (int) specified" << endl;
-				exit(0);
-			}
+			cout << process << " " << " " << order << " " << power << endl;
+			cout << "Wrong process specified, does not exist at " << order << endl;
+			exit(0);
 		}
 	}
 	else{
-		cout << process << " " << integrated << " " << order << " " << power << endl;
+		cout << process << " " << order << " " << power << endl;
 		cout << "Wrong order specified" << endl;
 		exit(0);
 	}
@@ -727,7 +675,6 @@ results call_vegas(functionint integrand, lumni_params params, bool verbal, bool
 	  gsl_rng_env_setup ();
 	  T = gsl_rng_default;
 	  r = gsl_rng_alloc (T);
-
 
 	  gsl_monte_vegas_state *s = gsl_monte_vegas_alloc (integrand.G.dim);
 	  int n_iter = 0;

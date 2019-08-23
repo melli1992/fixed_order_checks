@@ -63,7 +63,124 @@ complex<double> fit_sum_qqbar_charge_weighted(complex<double> x1, complex<double
 	}
 	return 1./x1*sum_pdf;
 }
+complex<double> fit_sum_qqbar_charge_unweighted(complex<double> x1, complex<double> x2){ //use for DeltaqqB2
+	complex<double> sum_pdf(0,0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
+	double charge_factor = 0;
+	for(int i = 1; i <=5; i++){
+		charge_factor += eq[i-1]*eq[i-1];
+		sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5-i,x1)*xfit_pdfs(5+i,x2/x1)+xfit_pdfs(5-i,x2/x1)*xfit_pdfs(5+i,x1));
+	}
+	return 1./x1*sum_pdf*charge_factor;
+}
+complex<double> fit_sum_qg_charge_weighted(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.};
+	for(int i = 1; i <=5; i++){
+		sum_pdf+= eq[i-1]*eq[i-1]*1./x1*1./(x2/x1)*(xfit_pdfs(5-i,x1)*xfit_pdfs(5,x2/x1)+xfit_pdfs(5,x1)*xfit_pdfs(5-i,x2/x1));
+		sum_pdf+= eq[i-1]*eq[i-1]*1./x1*1./(x2/x1)*(xfit_pdfs(5+i,x1)*xfit_pdfs(5,x2/x1)+xfit_pdfs(5,x1)*xfit_pdfs(5+i,x2/x1));
+	}
+	return 1./x1*sum_pdf;
+}
 
+complex<double> fit_sum_gg_charge_weighted(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.};
+	double charge_factor = 0;
+	for(int i = 1; i <=5; i++){
+		charge_factor += eq[i-1]*eq[i-1]; //still need the charge factor
+			}
+	sum_pdf = 1./x1*1./(x2/x1)*charge_factor*(xfit_pdfs(5,x1)*xfit_pdfs(5,x2/x1));
+	return 1./x1*sum_pdf;
+}
+//qq + qbarqbar +qqbar (identical+non-identical!), use it for DeltaNNLOC2
+complex<double> fit_sum_qq_charge_weighted_double(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
+	for(int i = -5; i <=5; i++){
+		for(int j = -5; j <=5; j++){
+			if(j==0){continue;}
+			if(i==0){continue;}
+			sum_pdf+= eq[abs(i)-1]*eq[abs(i)-1]*1./x1*1./(x2/x1)*(xfit_pdfs(5+i,x1)*xfit_pdfs(5+j,x2/x1)+xfit_pdfs(5+i,x2/x1)*xfit_pdfs(5+j,x1));
+		}
+	}
+	return 1./x1*sum_pdf;
+}
+//qq + qbarqbar +qqbar (identical+non-identical!), use it for DeltaNNLOC2
+complex<double> fit_sum_qq_charge_weighted_double_vivj(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
+	for(int i = -5; i <=5; i++){
+		for(int j = -5; j <=5; j++){
+			if(j==0){continue;}
+			if(i==0){continue;}
+			sum_pdf+= eq[abs(i)-1]*eq[abs(j)-1]*(-(float) i*j)/((float)abs(i*j))*1./x1*1./(x2/x1)*(xfit_pdfs(5+i,x1)*xfit_pdfs(5+j,x2/x1));
+		}
+	}
+	return 1./x1*sum_pdf;
+}
+//qq + qbarqbar +qqbar (identical!), use it for DeltaNNLOC2
+complex<double> fit_sum_qq_charge_weighted_single(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
+	for(int i = -5; i <=5; i++){
+			if(i==0){continue;}
+			sum_pdf+= eq[abs(i)-1]*eq[abs(i)-1]*1./x1*1./(x2/x1)*(xfit_pdfs(5+i,x1)*xfit_pdfs(5+i,x2/x1)+xfit_pdfs(5+i,x2/x1)*xfit_pdfs(5+i,x1));
+	}
+	return 1./x1*sum_pdf;
+}
+//qq + qbarqbar +qqbar (identical!), use it for DeltaNNLOC2
+complex<double> fit_sum_qq_charge_weighted_single_vivi(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);
+	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
+	for(int i = -5; i <=5; i++){
+			if(i==0){continue;}
+			sum_pdf+= eq[abs(i)-1]*eq[abs(i)-1]*1./x1*1./(x2/x1)*(xfit_pdfs(5+i,x1)*xfit_pdfs(5+i,x2/x1));
+	}
+	return 1./x1*sum_pdf;
+}
+
+// unweighted forms
+complex<double> fit_sum_gg(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);
+	sum_pdf = 1./x1*1./(x2/x1)*(xfit_pdfs(5,x1)*xfit_pdfs(5,x2/x1));
+	return 1./x1*sum_pdf;
+}
+complex<double> fit_sum_qg(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);
+	for(int i = 1; i <=5; i++){
+		sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5-i,x1)*xfit_pdfs(5,x2/x1)+xfit_pdfs(5,x1)*xfit_pdfs(5-i,x2/x1));
+		sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5+i,x1)*xfit_pdfs(5,x2/x1)+xfit_pdfs(5,x1)*xfit_pdfs(5+i,x2/x1));
+	}
+	return 1./x1*sum_pdf;
+}
+complex<double> fit_sum_qq(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);	
+	for(int i = 1; i <=5; i++){
+		sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5-i,x1)*xfit_pdfs(5-i,x2/x1)+xfit_pdfs(5+i,x1)*xfit_pdfs(5+i,x2/x1));
+	}
+	return 1./x1*sum_pdf;
+}
+complex<double> fit_sum_qqbar(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);	
+	for(int i = 1; i <=5; i++){
+		sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5-i,x1)*xfit_pdfs(5+i,x2/x1)+xfit_pdfs(5+i,x1)*xfit_pdfs(5-i,x2/x1));
+	}
+	return 1./x1*sum_pdf;
+}
+complex<double> fit_sum_qqNI(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);	
+	for(int i = 1; i <=5; i++){
+		for(int j = 1; j <=5; j++){
+			if(i>=j){continue;} //to avoid double counting!
+			sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5+i,x1)*xfit_pdfs(5+j,x2/x1)+xfit_pdfs(5+j,x1)*xfit_pdfs(5+i,x2/x1));
+			sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5-i,x1)*xfit_pdfs(5-j,x2/x1)+xfit_pdfs(5-j,x1)*xfit_pdfs(5-i,x2/x1));
+		}
+	}
+	return 1./x1*sum_pdf;
+}
+
+		
 /////////////////////////////////////////////////////////////////////////////////
 /// this is the convolution directly in N-space
 /// note that this is the xfx(N) convoluted product of q and qbar. It works for CMP > 0.8 (if Nint not scaled!)
@@ -77,6 +194,12 @@ complex<double> fit_mellin_pdf_sum_qqbar_charge_weighted(complex<double> Nint){
 	return sum_pdf;
 }
 
+// gluon gluon convolution
+complex<double> fit_mellin_pdf_sum_gg(complex<double> Nint){
+	complex<double> sum_pdf(0,0);
+	sum_pdf+= xfit_Nspace_pdfs(5,Nint)*xfit_Nspace_pdfs(5,Nint);
+	return sum_pdf;
+}
 /// ---------------------------------------------------------------------------------------------
 
 
@@ -87,24 +210,24 @@ complex<double> fit_mellin_pdf_sum_qqbar_charge_weighted(complex<double> Nint){
 // this is xfx(x)
 complex<double> xfit_pdfs(int i, complex<double> x){
 	complex<double> y = 1.-2.*pow(x,0.5);
-	return fitcoeff[Q][i][0]*pow(1.-x,fitcoeff[Q][i][1])*pow(x,fitcoeff[Q][i][2])*(1.+fitcoeff[Q][i][3]*y+fitcoeff[Q][i][4]*(2.*pow(y,2)-1.))+fitcoeff[Q][i][5]*pow(1.-x,fitcoeff[Q][i][6])*pow(x,fitcoeff[Q][i][7]);
+	return fitcoeff[muF][i][0]*pow(1.-x,fitcoeff[muF][i][1])*pow(x,fitcoeff[muF][i][2])*(1.+fitcoeff[muF][i][3]*y+fitcoeff[muF][i][4]*(2.*pow(y,2)-1.))+fitcoeff[muF][i][5]*pow(1.-x,fitcoeff[muF][i][6])*pow(x,fitcoeff[muF][i][7]);
 }
 // this is fx(x)
 complex<double> fit_pdfs(int i, complex<double> x){
 	complex<double> y = 1.-2.*pow(x,0.5);
-	return 1./x*(fitcoeff[Q][i][0]*pow(1.-x,fitcoeff[Q][i][1])*pow(x,fitcoeff[Q][i][2])*(1.+fitcoeff[Q][i][3]*y+fitcoeff[Q][i][4]*(2.*pow(y,2)-1.))+fitcoeff[Q][i][5]*pow(1.-x,fitcoeff[Q][i][6])*pow(x,fitcoeff[Q][i][7]));
+	return 1./x*(fitcoeff[muF][i][0]*pow(1.-x,fitcoeff[muF][i][1])*pow(x,fitcoeff[muF][i][2])*(1.+fitcoeff[muF][i][3]*y+fitcoeff[muF][i][4]*(2.*pow(y,2)-1.))+fitcoeff[muF][i][5]*pow(1.-x,fitcoeff[muF][i][6])*pow(x,fitcoeff[muF][i][7]));
 }
 // this is xfx(N) (mellin transform) checked that it gives the same answer when it is tranformed back to x-space
 // note that if fx(N) is needed, then N-> N-1 works
 complex<double> xfit_Nspace_pdfs(int i, complex<double> N){
-	double A = fitcoeff[Q][i][0];
-	double x3 = fitcoeff[Q][i][1];
-	double x4 = fitcoeff[Q][i][2];
-	double x5 = fitcoeff[Q][i][3];
-	double x6 = fitcoeff[Q][i][4];
-	double B = fitcoeff[Q][i][5];
-	double x7 = fitcoeff[Q][i][6];
-	double x8 = fitcoeff[Q][i][7];
+	double A = fitcoeff[muF][i][0];
+	double x3 = fitcoeff[muF][i][1];
+	double x4 = fitcoeff[muF][i][2];
+	double x5 = fitcoeff[muF][i][3];
+	double x6 = fitcoeff[muF][i][4];
+	double B = fitcoeff[muF][i][5];
+	double x7 = fitcoeff[muF][i][6];
+	double x8 = fitcoeff[muF][i][7];
 	// these are optional, it looks like the bended contour now doesnt perform so well anymore
 	// although it gets better for higher CMP (as expected)
 	// checked that we can take these out, then it still works (it is quicker that way, as it doesn't have to evaluate the if statements)

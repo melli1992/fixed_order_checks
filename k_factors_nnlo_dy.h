@@ -5,84 +5,63 @@
 
 #ifndef KFACTORNNLO_H
 #define KFACTORNNLO_H
-//needed for qqbar channel (identical quarks)
-double vegas_NNLO_qqbar_LP(double *k, size_t dim, void *params);
-double vegas_NNLO_qqbar_LP_correction(double *k, size_t dim, void *params);
-double vegas_NNLO_qqbar_NLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qqbar_NNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qqbar_NNNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qqbar_delta(double *k, size_t dim, void *params);
-double vegas_NNLO_qqbar_full(double *k, size_t dim, void *params);
-double NNLO_qqbar_A2(double x);
-double NNLO_qqbar_B2(double x);
-double NNLO_qqbar_BC(double x);
-double NNLO_qqbar_AC(double x);
-double NNLO_qqbar_HCA(double x);
-double NNLO_qqbar_HCF(double x);
-double NNLO_qqbar_b0_nonconst(double x);
-double NNLO_qqbar_b0_const();
-double NNLO_qqbar_delta();
-double NNLO_qqbar_LP(double z);
-double NNLO_qqbar_b0_LP(double x);
-double NNLO_qqbar_NLP(double z);
-double NNLO_qqbar_NNLP(double x);
-double NNLO_qqbar_NNNLP(double x);
-// also an integration routine to check the result
-double vegas_NNLO_LP_int(double *k, size_t dim, void *params);
+//needed for qqbar channel
+double vegas_DY_NNLO_qqbar_LP(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_qqbar_zdep(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_qqbar_zdepcorr(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_qqbar_delta(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_qqbar_power(double *k, size_t dim, void *params);
+//fit functions
+double vegas_DY_NNLO_qqbar_LP_fit(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_qqbar_zdep_fit(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_qqbar_zdepcorr_fit(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_qqbar_delta_fit(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_qqbar_power_fit(double *k, size_t dim, void *params);
 
-//needed for qg
-double vegas_NNLO_qg_NLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qg_NNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qg_NNNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qg_full(double *k, size_t dim, void *params);
-double NNLO_qg_NLP(double x);
-double NNLO_qg_NNLP(double x);
-double NNLO_qg_NNNLP(double x);
-double NNLO_qg_full(double x);
+double DY_NNLO_qqbar_delta();
+double DY_NNLO_qqbar_plus(double x);
+double DY_NNLO_qqbar_NS(double x);
+double DY_NNLO_qqbar_NS_expansion(double x, int power);
+double DY_NNLO_BB_full(double x);
+double DY_NNLO_BB_expansion(double x, int power);
+double DY_NNLO_BC_full(double x);
+double DY_NNLO_BC_expansion(double x, int power);
+
+//needed for qq, qbarqbar
+double vegas_DY_NNLO_qq_full(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_qq_power(double *k, size_t dim, void *params);
+// fitted
+double vegas_DY_NNLO_qq_full_fit(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_qq_power_fit(double *k, size_t dim, void *params);
+
+double DY_NNLO_CC_full(double x);
+double DY_NNLO_CC_expansion(double x, int power);
+double DY_NNLO_CD_full(double x);
+double DY_NNLO_CD_expansion(double x, int power);
+double DY_NNLO_CE_full(double x);
+double DY_NNLO_CE_expansion(double x, int power);
+double DY_NNLO_CF_full(double x);
+double DY_NNLO_CF_expansion(double x, int power);
+
 
 //needed for gg
-double vegas_NNLO_gg_NLP(double *k, size_t dim, void *params);
-double vegas_NNLO_gg_NNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_gg_NNNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_gg_full(double *k, size_t dim, void *params);
-double NNLO_gg_NLP(double x);
-double NNLO_gg_NNLP(double x);
-double NNLO_gg_NNNLP(double x);
-double NNLO_gg_full(double x);
+double vegas_DY_NNLO_gg_full(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_gg_power(double *k, size_t dim, void *params);
+// fitted
+double vegas_DY_NNLO_gg_full_fit(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_gg_power_fit(double *k, size_t dim, void *params);
 
-//needed for qq, qqbar, qbarqbar (non-identical)
-double vegas_NNLO_qqNI_NLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qqNI_NNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qqNI_NNNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qqNI_full(double *k, size_t dim, void *params);
-double vegas_NNLO_qqbarNI_NLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qqbarNI_NNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qqbarNI_NNNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qqbarNI_full(double *k, size_t dim, void *params);
-double vegas_NNLO_qbarqbarNI_NLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qbarqbarNI_NNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qbarqbarNI_NNNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qbarqbarNI_full(double *k, size_t dim, void *params);
-double NNLO_qqNI_NLP(double x);
-double NNLO_qqNI_NNLP(double x);
-double NNLO_qqNI_NNNLP(double x);
-double NNLO_qqNI_full(double x);
-double NNLO_qqbarNI_NLP(double x);
-double NNLO_qqbarNI_NNLP(double x);
-double NNLO_qqbarNI_NNNLP(double x);
-double NNLO_qqbarNI_full(double x);
+double DY_NNLO_gg_full(double x);
+double DY_NNLO_gg_expansion(double x, int power);
 
-//needed for qq, qbarqbar (identical)
-double vegas_NNLO_qq_NLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qq_NNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qq_NNNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qq_full(double *k, size_t dim, void *params);
-double vegas_NNLO_qbarqbar_NLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qbarqbar_NNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qbarqbar_NNNLP(double *k, size_t dim, void *params);
-double vegas_NNLO_qbarqbar_full(double *k, size_t dim, void *params);
-double NNLO_qq_NLP(double x);
-double NNLO_qq_NNLP(double x);
-double NNLO_qq_NNNLP(double x);
-double NNLO_qq_full(double x);
+//needed for qg
+double vegas_DY_NNLO_qg_full(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_qg_power(double *k, size_t dim, void *params);
+// fitted
+double vegas_DY_NNLO_qg_full_fit(double *k, size_t dim, void *params);
+double vegas_DY_NNLO_qg_power_fit(double *k, size_t dim, void *params);
+
+double DY_NNLO_qg_full(double x);
+double DY_NNLO_qg_expansion(double x, int power);
+
 #endif

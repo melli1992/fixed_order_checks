@@ -16,6 +16,7 @@
 
 extern std::complex<double> I;
 extern double CMP, phiMP;
+
 extern double tau;
 extern double S;
 extern double S2;
@@ -25,6 +26,17 @@ extern double muF;
 extern double muF2;
 extern double muR;
 extern double muR2;
+extern double pbunits;
+
+extern double quarkmasses[2];
+extern double mH;
+extern double Lt;
+
+extern double M_gammaE;
+extern double zeta2;
+extern double zeta3;
+extern double zeta5;
+
 extern double CF;
 extern double CA;
 extern double TF;
@@ -34,12 +46,18 @@ extern double alphas_Q;
 extern double alphaEM;
 extern double GF;
 extern double nF;
-extern double zeta2;
-extern double zeta3;
-extern double zeta5;
+
+
 extern double b0;
-extern double beta0;
 extern double b1;
+extern double b2;
+extern double beta0;
+
+extern double ISLL;
+extern double ISNLL;
+extern double ISNNLL;
+extern double ISNLP;
+
 extern double A1q;
 extern double A1g;
 extern double A2q;
@@ -56,15 +74,16 @@ extern double D3DY;
 extern double D1higgs;
 extern double D2higgs;
 extern double D3higgs;
-extern double pbunits;
-extern double M_gammaE;
+
 extern std::string setname;
 extern std::vector<LHAPDF::PDF*> pdfs; //pdf vector
 extern double xmin_pdfs, xmax_pdfs; //min x, max x
-
 struct lumni_params {double z; double pT; double xT; double epeta; double emeta; int power; int flavor; int coefficient;};
+
+extern bool DY, higgs, PF, LO, NLO, NNLO, RES, realPDF, fitPDF;
+
 void print_usage();
-void update_defaults();
+void update_defaults(bool printout = true , bool pdfset = true);
 void read_arguments(int argc, char* argv[]);
 
 extern std::unordered_map<double, std::vector<std::vector<double>>> fitcoeff;

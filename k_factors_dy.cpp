@@ -5,328 +5,298 @@
 #include <gsl/gsl_sf_dilog.h>
 #include "parameters.h"
 #include "deriv_pdf.h"
+#include "mellin_pdf.h"
 #include "k_factors_dy.h"
 using namespace std;
 
 //////////////////////////////////////////////////////////
 ///
 /// contains all K factors for drell yan 
-/// split up in LP, NLP, LO, NLO
+/// split up in LO, NLO and the power expansion
 ///
 //////////////////////////////////////////////////////////
 
 
+/////////////////////////////////////////////////////////////////////////////////////////
+/// LO
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// prefactor as given in Nucl.Phys. B359 (1991) 343-405, (A.1), alpha should be alphaEM
-/// and Q^4 is actually S^2 * Q^2 (see e.g. universality paper https://arxiv.org/pdf/1706.04018.pdf
+/// (tau*sigma0!)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-double LO_factor(){
+double DY_LO_factor(){
 	return pbunits*4.*M_PI*alphaEM*alphaEM/(3.*Q2*S2)*1./CA;
 }
 
-///////////////////////////////////////////////
-///
-/// next is the gg NLO channel (int and nonint)
-///
-///////////////////////////////////////////////
-
-////////////////////////////////////////////////
-/// LP NLO contribution of DY integrated over z'
-////////////////////////////////////////////////
-double k_zint_NLO_gg_dy_LP(double z){
-	return CF*alphas_Q/(4.*M_PI)*(8*pow(log(1.-z),2));
+////////////////////////////////////////////////////////////////
+/// constant delta contribution
+////////////////////////////////////////////////////////////////
+double vegas_DY_LO(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	double result = DY_LO_factor()*(pdf_sum_qqbar_charge_weighted(k[0],tau));
+	if (isnan(result)){return 0;}
+	else{return result;}
+}
+double vegas_DY_LO_fit(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	double result = DY_LO_factor()*real(fit_sum_qqbar_charge_weighted(k[0],tau));
+	if (isnan(result)){return 0;}
+	else{return result;}
 }
 
 
-/////////////////////////////////////////////////
-/// NLP NLO contribution of DY integrated over z'
-/////////////////////////////////////////////////
-double k_zint_NLO_gg_dy_NLP(double z){
-	return CF*alphas_Q/(4.*M_PI)*(-8.*(1.-z)*(2.*log(1.-z)-3.));
+/////////////////////////////////////////////////////////////////////////////////////////
+/// NLO
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////
+/// qqbar channel
+///////////////////////////
+
+/////////// integration routines
+
+double vegas_DY_NLO_qqbar_zdep(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	double z = k[0];
+	double jacobian = 1.-tau/z; 
+	double x = tau/z+k[1]*jacobian;
+	double result = DY_LO_factor()*(DY_NLO_qqbar_reg(z)*jacobian*real(pdf_sum_qqbar_charge_weighted(x,tau/z))/z+DY_NLO_qqbar_plus(z)*(jacobian*real(pdf_sum_qqbar_charge_weighted(x,tau/z))/z-(1.-tau)*real(pdf_sum_qqbar_charge_weighted(tau+k[1]*(1.-tau),tau))));
+	if (isnan(result)){return 0;}
+	else{return result;}
+}
+double vegas_DY_NLO_qqbar_zdep_fit(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+
+	double z = k[0];
+	double jacobian = 1.-tau/z; 
+	double x = tau/z+k[1]*jacobian;
+	double result = DY_LO_factor()*(DY_NLO_qqbar_reg(z)*jacobian*real(fit_sum_qqbar_charge_weighted(x,tau/z))/z+DY_NLO_qqbar_plus(z)*(jacobian*real(fit_sum_qqbar_charge_weighted(x,tau/z))/z-(1.-tau)*real(fit_sum_qqbar_charge_weighted(tau+k[1]*(1.-tau),tau))));
+	
+	
+	if (isnan(result)){return 0;}
+	else{return result;}
+}
+double vegas_DY_NLO_qqbar_zdepcorr(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+
+	double z = k[0]; // from 0 to tau
+	double jacobian = 1.-tau; 
+	double x = tau+k[1]*jacobian;
+	double result =  DY_LO_factor()*(DY_NLO_qqbar_plus(z))*jacobian*(-pdf_sum_qqbar_charge_weighted(x,tau));
+	
+	if (isnan(result)){return 0;}
+	else{return result;}
+}
+double vegas_DY_NLO_qqbar_zdepcorr_fit(double *k, size_t dim, void *params){ /*correction from not integrating from 0 to 1 but tau to 1*/
+	(void)(dim);
+	(void)(params);
+
+	double z = k[0]; // from 0 to tau
+	double jacobian = 1.-tau; 
+	double x = tau+k[1]*jacobian;
+	
+	double result =  DY_LO_factor()*(DY_NLO_qqbar_plus(z))*jacobian*(-real(fit_sum_qqbar_charge_weighted(x,tau)));
+	if (isnan(result)){return 0;}
+	else{return result;}
+}
+double vegas_DY_NLO_qqbar_delta(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	double result = DY_LO_factor()*DY_NLO_qqbar_delta()*real(pdf_sum_qqbar_charge_weighted(k[0],tau));
+	if (isnan(result)){return 0;}
+	else{return result;}
+}
+double vegas_DY_NLO_qqbar_delta_fit(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	
+	double result = DY_LO_factor()*DY_NLO_qqbar_delta()*real(fit_sum_qqbar_charge_weighted(k[0],tau));
+	if (isnan(result)){return 0;}
+	else{return result;}
+}
+double vegas_DY_NLO_qqbar_LP(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	double z = k[0];
+	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
+	double x = tau/z+k[1]*jacobian;
+	return DY_LO_factor()*(DY_NLO_qqbar_plus(z))*(jacobian*pdf_sum_qqbar_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z - (1.-tau)*pdf_sum_qqbar_charge_weighted(tau+k[1]*(1.-tau),tau));
+}
+double vegas_DY_NLO_qqbar_LP_fit(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	double z = k[0];
+	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
+	double x = tau/z+k[1]*jacobian;
+	return DY_LO_factor()*(DY_NLO_qqbar_plus(z))*(jacobian*real(fit_sum_qqbar_charge_weighted(tau/z+k[1]*jacobian,tau/z))/z - (1.-tau)*real(fit_sum_qqbar_charge_weighted(tau+k[1]*(1.-tau),tau)));
+}
+double vegas_DY_NLO_qqbar_power(double *k, size_t dim, void *params){
+	(void)(dim);
+	struct lumni_params * fp = (struct lumni_params *)params;
+	double z = k[0];
+	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
+	double x = tau/z+k[1]*jacobian;
+	return DY_LO_factor()*(DY_NLO_qqbar_expansion(z, fp->power))*(jacobian*pdf_sum_qqbar_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
+}
+double vegas_DY_NLO_qqbar_power_fit(double *k, size_t dim, void *params){
+	(void)(dim);
+	struct lumni_params * fp = (struct lumni_params *)params;
+	double z = k[0];
+	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
+	double x = tau/z+k[1]*jacobian;
+	return DY_LO_factor()*(DY_NLO_qqbar_expansion(z, fp->power))*(jacobian*real(fit_sum_qqbar_charge_weighted(tau/z+k[1]*jacobian,tau/z))/z);
+	
 }
 
 
-//////////////////////////////////////////////////
-/// NNLP NLO contribution of DY integrated over z'
-//////////////////////////////////////////////////
-double k_zint_NLO_gg_dy_NNLP(double z){
-	return CF*alphas_Q/(M_PI)*(pow(1.-z,2.)*(log(1.-z)-1.));
+/////////////////////////////////////////////////////////////////
+/// Nucl.Phys. B359 (1991) 343-405 - B.4 - non constant piece
+/////////////////////////////////////////////////////////////////
+double DY_NLO_qqbar_reg(double x){
+	return (alphas_muR*CF*(-4*(1 + x)*log(Q2/muF2) - 8*(1 + x)*log(1 - x) + (4*(1 + pow(x,2))*log(x))/(-1 + x)))/(4.*M_PI);
 }
-
-
-//////////////////////////////////////////////////
-/// const NLO contribution of DY integrated over z'
-//////////////////////////////////////////////////
-double k_zint_NLO_gg_dy_delta(){
-	return CF*alphas_Q/(4.*M_PI)*2.*(2.*M_PI*M_PI/3. - 8.);
-}     
-
-
-///////////////////////////////////////////////////
-/// total NLO contribution of DY integrated over z'
-///////////////////////////////////////////////////
-double k_zint_NLO_gg_dy_exact(double z){
-	return CF*alphas_Q/(4.*M_PI)*2.*(-4.*gsl_sf_dilog(z)+2.*(pow(z,2)+2.*z-2.*log(z)-3.)*log(1.-z)+1./2.*(1.-z)*(z+9.)+4.*pow(log(1.-z),2.)-z*(z+2.)*log(z)+2.*pow(M_PI,2.)/3.);
+///////////////////////////////////////////////////////////
+/// Nucl.Phys. B359 (1991) 343-405 - B.3 - plus dist
+///////////////////////////////////////////////////////////
+double DY_NLO_qqbar_plus(double x){
+	return (2*alphas_muR*CF*(2*log(1.-x)/(1.-x) + log(Q2/muF2)/(1.-x)))/M_PI;
 }
-
-
 ///////////////////////////////////////////////////////////
 /// Nucl.Phys. B359 (1991) 343-405 - B.3 - delta(1-z) piece
 ///////////////////////////////////////////////////////////
-double k_NLO_dy_gg_delta(){
-	return 6.*log(Q2/muF2)+8*zeta2-16.;
+double DY_NLO_qqbar_delta(){
+	return (alphas_muR*CF*(-24 + 2*pow(M_PI,2) + 9*log(Q2/muF2)))/(6.*M_PI);
 }
-
-/////////////////////////////////////////////////////////////////
-/// Nucl.Phys. B359 (1991) 343-405 - B.3+B.4 - non constant piece
-/////////////////////////////////////////////////////////////////
-double k_NLO_dy_gg_nonconst(double z){
-	double minz = 1.-z; //define 1-z because we use it so much
-	return 16.*log(minz)/minz + 8.*log(Q2/muF2)/minz-4.*(1.+z)*log(Q2/muF2)-8.*(1+z)*log(minz)-4.*(1+pow(z,2))/minz*log(z);
-}
-
-////////////////////////////////////////////////////////
-/// the vegas routine function
-/// still think whether this is the good thing to do!
-/// as you integrate over plus distribution
-/// this is probably wrong this way, need to split it up
-////////////////////////////////////////////////////////
-double vegas_k_NLO_dy_gg(double *k, size_t dim, void *params){
-	(void)(dim);
-	lumni_params * lp = (lumni_params *)params;
-	return k_NLO_dy_gg_nonconst(lp->z)+k_NLO_dy_gg_delta();
-}
-
-///////////////////////////////////////////////
-///
-/// next is the qg NLO channel (int and nonint)
-///
-///////////////////////////////////////////////
-
-/////////////////////////////////////////////////
-/// NLP NLO contribution of DY integrated over z'
-/////////////////////////////////////////////////
-double k_zint_NLO_qg_dy_NLP(double z){
-	return TF*alphas_Q/(4.*M_PI)*(-2*(-1 + z)*(-2 + log((Q*pow(-1. + z,2.))/muF)));
-}
-
-//////////////////////////////////////////////////
-/// NNLP NLO contribution of DY integrated over z'
-//////////////////////////////////////////////////
-double k_zint_NLO_qg_dy_NNLP(double z){
-	return TF*alphas_Q/(4.*M_PI)*((-pow(-1. + z,2.))*(-7. + 2.*log((Q*pow(-1. + z,2))/muF)));
-}
-
-//////////////////////////////////////////////////////
-/// exact NLO qg contribution of DY integrated over z'
-//////////////////////////////////////////////////////
-double k_zint_NLO_qg_dy_exact(double z){
-	return alphas_Q*TF/(36.*M_PI)*((z-1.)*(6.*(-2.*pow(z,2)+z-2.)*log(Q2/muF2)+25.*pow(z,2)+z-2.)+12.*(z*((3.-2.*z)*z-3.)+2.)*log(1.-z)+6.*z*(z*(2.*z-3.)+3.)*log(z));
+// power expansions
+double DY_NLO_qqbar_expansion(double x, int power){
+	if(power==1){
+		return (-2*alphas_muR*CF*(-1 + log(Q2/muF2) + 2*log(1 - x)))/M_PI;
+	}
+	if(power==2){
+		return -((alphas_muR*CF*(-1 + x)*(-1 + log(Q2/muF2) + 2*log(1 - x)))/M_PI);
+	}
+	if(power==3){
+		return (2*alphas_muR*CF*pow(-1 + x,2))/(3.*M_PI);
+	}
+	if(power==4){
+		return -(alphas_muR*CF*pow(-1 + x,3))/(3.*M_PI);
+	}
+	if(power==5){
+		return (7*alphas_muR*CF*pow(-1 + x,4))/(30.*M_PI);
+	}
+	if(power==6){
+		return (-11*alphas_muR*CF*pow(-1 + x,5))/(60.*M_PI);
+	}
+	if(power==7){
+		return (16*alphas_muR*CF*pow(-1 + x,6))/(105.*M_PI);
+	}
+	if(power==8){
+		return (-11*alphas_muR*CF*pow(-1 + x,7))/(84.*M_PI);
+	}
+	if(power==9){
+		return (29*alphas_muR*CF*pow(-1 + x,8))/(252.*M_PI);
+	}
+	if(power==10){
+		return (-37*alphas_muR*CF*pow(-1 + x,9))/(360.*M_PI);
+	}
+	if(power==-1){
+		return DY_NLO_qqbar_reg(x)-(-(alphas_muR*CF*(-7353 + 17287*x - 42482*pow(x,2) + 65038*pow(x,3) - 73142*pow(x,4) + 58570*pow(x,5) - 32570*pow(x,6) + 11974*pow(x,7) - 2621*pow(x,8) + 259*pow(x,9) + 2520*(1 + x)*log(Q2/muF2) + 5040*(1 + x)*log(1 - x)))/(2520.*M_PI));
+	}
+	if(power==-2){
+		return -(alphas_muR*CF*(-7353 + 17287*x - 42482*pow(x,2) + 65038*pow(x,3) - 73142*pow(x,4) + 58570*pow(x,5) - 32570*pow(x,6) + 11974*pow(x,7) - 2621*pow(x,8) + 259*pow(x,9) + 2520*(1 + x)*log(Q2/muF2) + 5040*(1 + x)*log(1 - x)))/(2520.*M_PI);
+	}
 }
 
 
-//////////////////////////////////////////////
-/// LP contribution for NLO DY
-//////////////////////////////////////////////
-double vegas_sig_LP_1(double *k, size_t dim, void *params){
+///////////////////////////
+/// qg channel
+///////////////////////////
+
+
+/////////// integration routines
+
+double vegas_DY_NLO_qg_full(double *k, size_t dim, void *params){
 	(void)(dim);
 	(void)(params);
 	double z = k[0];
 	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
 	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*16.*log(1.-z)/(1.-z)*(jacobian*pdf_sum_qqbar_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z - (1.-tau)*pdf_sum_qqbar_charge_weighted(tau+k[1]*(1.-tau),tau));
+	return DY_LO_factor()*(DY_NLO_qg_full(z))*(jacobian*pdf_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
 }
-//////////////////////////////////////////////////////////////
-/// correction term stemming from not integrating from 0 to 1
-//////////////////////////////////////////////////////////////
-double vegas_sig_LP_correction(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0]; // from 0 to tau
-	double jacobian = 1.-tau; //needed to transform the boundary dependent terms
-	double x = tau+k[1]*jacobian;
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*16.*log(1.-z)/(1.-z)*jacobian*(-pdf_sum_qqbar_charge_weighted(x,tau));
-	
-	//return log(1.-z)/(1.-z)*jacobian*(x*(z-tau) - x*(1.-tau)); // test function
-}
-
-////////////////////////////////////////
-/// NLP contribution DY nlo
-////////////////////////////////////////
-double vegas_sig_NLP(double *k, size_t dim, void *params){
+double vegas_DY_NLO_qg_full_fit(double *k, size_t dim, void *params){
 	(void)(dim);
 	(void)(params);
 	double z = k[0];
 	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
 	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*(8.-16.*log(1-z)-8.*log(Q2/muF2))*(jacobian*pdf_sum_qqbar_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
+	return DY_LO_factor()*(DY_NLO_qg_full(z))*(jacobian*real(fit_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z))/z);
 }
-
-
-////////////////////////////////////////
-/// NNLP contribution DY nlo
-////////////////////////////////////////
-double vegas_sig_NNLP(double *k, size_t dim, void *params){
+double vegas_DY_NLO_qg_power(double *k, size_t dim, void *params){
 	(void)(dim);
-	(void)(params);
+	struct lumni_params * fp = (struct lumni_params *)params;
 	double z = k[0];
 	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
 	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*((-4.+8.*log(1-z)+4.*log(Q2/muF2))*(1-z))*(jacobian*pdf_sum_qqbar_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
+	return DY_LO_factor()*(DY_NLO_qg_expansion(z, fp->power))*(jacobian*pdf_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
 }
-
-
-////////////////////////////////////////////////////////////////
-/// constant delta contribution (contains LO)
-/// already integrated over z
-/// so make sure here no z integral
-////////////////////////////////////////////////////////////////
-double vegas_LO(double *k, size_t dim, void *params){
+double vegas_DY_NLO_qg_power_fit(double *k, size_t dim, void *params){
 	(void)(dim);
-	(void)(params);
-	double jacobian = 1.;//-tau; //needed to transform the boundary dependent terms
-	double x = /*tau+*/k[0]*jacobian;
-	return LO_factor()*(1.)*(jacobian*pdf_sum_qqbar_charge_weighted(/*tau+*/k[0]*jacobian,tau));
-}
-
-
-
-////////////////////////////////////////////////////////////////
-/// constant delta contribution (contains alphas*delta(1-z))
-/// already integrated over z
-/// so make sure here no z integral
-////////////////////////////////////////////////////////////////
-double vegas_sig_delta(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double jacobian = 1.;//-tau; //needed to transform the boundary dependent terms
-	double x = /*tau+*/k[0]*jacobian;
-	return LO_factor()*((alphas_Q/(4.*M_PI)*CF*(8.*zeta2 - 16.)))*(jacobian*pdf_sum_qqbar_charge_weighted(/*tau+*/k[0]*jacobian,tau));
-}
-
-
-
-double vegas_sum_pdf(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double jacobian = 1.;//-tau; //needed to transform the boundary dependent terms
-	double x = /*tau+*/k[0]*jacobian;
-	return (jacobian*pdf_sum_qqbar_charge_weighted(/*tau+*/k[0]*jacobian,tau));
-}
-
-///////////////////////////////////////////////////////////////////
-/// full contribution DY nlo (without the plus distribution term)
-///////////////////////////////////////////////////////////////////
-double vegas_sig_full(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
+	struct lumni_params * fp = (struct lumni_params *)params;
 	double z = k[0];
 	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
 	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*(-8.*(1.+z)*log(1.-z)-4.*(1.+pow(z,2))/(1.-z)*log(z))*(jacobian*pdf_sum_qqbar_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
+	return DY_LO_factor()*(DY_NLO_qg_expansion(z, fp->power))*(jacobian*real(fit_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z))/z);
 }
 
-double vegas_sig_LP_int(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0]; // from tau to 1
-	double x = k[1]; // from 0 to 1
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*16.*1./2.*pow(log(1.-z),2)*derivative_qq_pdf_jac(x, z, tau); // jacobian needs to be in the derivative
+///// NLO functions
+double DY_NLO_qg_full(double x){
+	return (alphas_muR*TF*(1 + 6*x - 7*pow(x,2) + 2*(1 - 2*x + 2*pow(x,2))*(log(Q2/muF2) + 2*log(1 - x) - log(x))))/(4.*M_PI);
 }
-
-double vegas_sig_NLP_int(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0]; // from tau to 1
-	double x = k[1]; // from 0 to 1
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*(-16.*(1.-z)*(log(1.-z)-3./2))*derivative_qq_pdf_jac(x, z, tau); // jacobian needs to be in the derivative
-}
-
-double vegas_sig_NNLP_int(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0]; // from tau to 1
-	double x = k[1]; // from 0 to 1
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*(4.*pow(1.-z,2)*(log(1.-z)-1.))*derivative_qq_pdf_jac(x, z, tau); // jacobian needs to be in the derivative
-}
-
-double vegas_sig_full_int(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0]; // from tau to 1
-	double x = k[1]; // from 0 to 1
-	return LO_factor()*alphas_Q/(4*M_PI)*CF*2.*(-4.*gsl_sf_dilog(z)+2.*(pow(z,2)+2.*z-2.*log(z)-3.)*log(1.-z)+1./2.*(1.-z)*(z+9.)+4.*pow(log(1.-z),2.)-z*(z+2.)*log(z)+2.*pow(M_PI,2.)/3.)*derivative_qq_pdf_jac(x, z, tau); // jacobian needs to be in the derivative
-}
-
-double vegas_qg_full_int(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0]; // from tau to 1
-	double x = k[1]; // from 0 to 1
-	return LO_factor()*k_zint_NLO_qg_dy_exact(z)*derivative_qg_pdf_jac(x, z, tau); // jacobian needs to be in the derivative
-}
-
-double vegas_qg_full(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*alphas_Q/(4*M_PI)*TF*(2.*(1.+2.*pow(z,2)-2.*z)*(log(pow(1.-z,2))-log(z)+log(Q2/muF2))+1.-7.*pow(z,2)+6.*z)*(jacobian*pdf_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
+double DY_NLO_qg_expansion(double x, int power){		
+	if(power==1){
+		return (alphas_muR*TF*(log(Q2/muF2) + 2*log(1 - x)))/(2.*M_PI);
+	}
+	if(power==2){
+		return (alphas_muR*TF*(-1 + x)*(-5 + 2*log(Q2/muF2) + 4*log(1 - x)))/(2.*M_PI);
+	}
+	if(power==3){
+		return (alphas_muR*TF*pow(-1 + x,2)*(-5 + 2*log(Q2/muF2) + 4*log(1 - x)))/(2.*M_PI);
+	}
+	if(power==4){
+		return (-2*alphas_muR*TF*pow(-1 + x,3))/(3.*M_PI);
+	}
+	if(power==5){
+		return (7*alphas_muR*TF*pow(-1 + x,4))/(24.*M_PI);
+	}
+	if(power==6){
+		return (-11*alphas_muR*TF*pow(-1 + x,5))/(60.*M_PI);
+	}
+	if(power==7){
+		return (2*alphas_muR*TF*pow(-1 + x,6))/(15.*M_PI);
+	}
+	if(power==8){
+		return (-11*alphas_muR*TF*pow(-1 + x,7))/(105.*M_PI);
+	}
+	if(power==9){
+		return (29*alphas_muR*TF*pow(-1 + x,8))/(336.*M_PI);
+	}
+	if(power==10){
+		return (-37*alphas_muR*TF*pow(-1 + x,9))/(504.*M_PI);
+	}
+	if(power==-1){
+		return DY_NLO_qg_full(x)-((alphas_muR*TF*(7759 - 22518*x + 62208*pow(x,2) - 105840*pow(x,3) + 111720*pow(x,4) - 87024*pow(x,5) + 47628*pow(x,6) - 17328*pow(x,7) + 3765*pow(x,8) - 370*pow(x,9) + 2520*(1 - 2*x + 2*pow(x,2))*log(Q2/muF2) + 5040*(1 - 2*x + 2*pow(x,2))*log(1 - x)))/(5040.*M_PI));
+	}
+	if(power==-2){
+		return (alphas_muR*TF*(7759 - 22518*x + 62208*pow(x,2) - 105840*pow(x,3) + 111720*pow(x,4) - 87024*pow(x,5) + 47628*pow(x,6) - 17328*pow(x,7) + 3765*pow(x,8) - 370*pow(x,9) + 2520*(1 - 2*x + 2*pow(x,2))*log(Q2/muF2) + 5040*(1 - 2*x + 2*pow(x,2))*log(1 - x)))/(5040.*M_PI);
+	}
 }
 
 
-
-///////////////////////////////////////
-///
-/// the qg channel
-///
-///////////////////////////////////////
-
-///////integration routines
-double vegas_NLO_qg_full(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*(NLO_qg_full(z))*(jacobian*pdf_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
-}
-double vegas_NLO_qg_NLP(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*(NLO_qg_NLP(z))*(jacobian*pdf_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
-}
-double vegas_NLO_qg_NNLP(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*(NLO_qg_NNLP(z))*(jacobian*pdf_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
-}
-double vegas_NLO_qg_NNNLP(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return LO_factor()*(NLO_qg_NNNLP(z))*(jacobian*pdf_sum_qg_charge_weighted(tau/z+k[1]*jacobian,tau/z)/z);
-}
-
-//////// NLO functions
-double NLO_qg_NLP(double x){
-	return (alphas_Q*TF*(log(Q2/muF2) + 2*log(1 - x)))/(2.*M_PI);
-}
-double NLO_qg_NNLP(double x){
-	return (alphas_Q*TF*(-1 + x)*(-5 + 2*log(Q2/muF2) + 4*log(1 - x)))/(2.*M_PI);
-}
-double NLO_qg_NNNLP(double x){
-	return (alphas_Q*TF*pow(-1 + x,2)*(-5 + 2*log(Q2/muF2) + 4*log(1 - x)))/(2.*M_PI);
-}
-double NLO_qg_full(double x){
-	return (alphas_Q*TF*(1 + 6*x - 7*pow(x,2) + 2*(1 - 2*x + 2*pow(x,2))*(log(Q2/muF2) + 2*log(1 - x) - log(x))))/(4.*M_PI);
-}

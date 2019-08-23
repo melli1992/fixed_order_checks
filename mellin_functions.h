@@ -11,22 +11,23 @@ double vegas_fofx2_deriv(double *k, size_t dim, void *params);
 double vegas_fofx2_defor(double *k, size_t dim, void *params);
 double vegas_fofx2_Nspace(double *k, size_t dim, void *params);
 
-// the LO version (check of the implementation)
-double vegas_sigma0_true(double *k, size_t dim, void *params);
-double vegas_sigma0_nomel(double *k, size_t dim, void *params);
-double vegas_sigma0_exact(double *k, size_t dim, void *params);
-double vegas_sigma0_deriv(double *k, size_t dim, void *params);
-double vegas_sigma0_defor(double *k, size_t dim, void *params);
+// the LO versions of DY(check of the implementations)
+double vegas_DY_true(double *k, size_t dim, void *params);
+double vegas_DY_fit(double *k, size_t dim, void *params);
+double vegas_DY_mellin(double *k, size_t dim, void *params);
+double vegas_DY_deriv(double *k, size_t dim, void *params);
+double vegas_DY_defor(double *k, size_t dim, void *params);
+// the LO versions of higgs 
+double vegas_higgs_true(double *k, size_t dim, void *params);
+double vegas_higgs_fit(double *k, size_t dim, void *params);
+double vegas_higgs_mellin(double *k, size_t dim, void *params);
 
 // the resummed functions
-double vegas_resum_defor(double *k, size_t dim, void *params);
+double vegas_resum_DY(double *k, size_t dim, void *params);
+double vegas_resum_DY_expanded_NLO(double *k, size_t dim, void *params);
+double vegas_resum_DY_expanded_NNLO(double *k, size_t dim, void *params);
+double vegas_resum_higgs(double *k, size_t dim, void *params);
+double vegas_resum_higgs_expanded_NLO(double *k, size_t dim, void *params);
+double vegas_resum_higgs_expanded_NNLO(double *k, size_t dim, void *params);
 
-// the resummation coefficients
-std::complex<double> LP_LL_q(std::complex<double>N);
-std::complex<double> h0q(std::complex<double>lambda);
-std::complex<double> h0g(std::complex<double>lambda);
-std::complex<double> h0qNLP(std::complex<double> N, std::complex<double>lambda);
-std::complex<double> h0gNLP(std::complex<double> N, std::complex<double>lambda);
-std::complex<double> h1q(std::complex<double>lambda);
-std::complex<double> h1g(std::complex<double>lambda);
 #endif

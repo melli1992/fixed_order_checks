@@ -47,7 +47,7 @@ double Li2(double x){
 }
 
 double Li3(double x){
-	if(x < -1 || x > 1){cout << "OOB Li3" << endl; exit(0);}
+	if(x < -1 || x > 1){cout << "OOB Li_3 " << x << endl; exit(0);}
 	if(x > -0.5 && x < 0.5){return clenshaw(coeff_without_log, 2.*x);}
 	if(x >= 0.5){return clenshaw(coeff_with_log, 4.*(1.-x)-1.)-1./2.*log(1.-x)*pow(log(x),2);}
 	if(x <= -0.5){return clenshaw(coeff_without_log_min, 4.*x+3.);}
@@ -55,7 +55,7 @@ double Li3(double x){
 
 
 double S12(double x){
-	if(x < -1  || x > 1){cout << "OOB S12" << endl; exit(0);}
+	if(x < -1  || x > 1){cout << "OOB S_12 " << endl; exit(0);}
 	if(x <= -0.5){return clenshaw(coeff_s12_without_log2, 4.*x+3.);}
 	if(x>-0.5 && x <= 0.5){return clenshaw(coeff_s12_without_log1, 2.*x);}
 	if(x > 0.5){return clenshaw(coeff_s12_with_log, 4.*x-3.) + 1./2.*log(x)*pow(log(1.-x),2) + gsl_sf_dilog(1.-x)*log(1.-x);}
