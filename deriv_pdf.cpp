@@ -45,7 +45,7 @@ double pdf_sum_qqbar_charge_unweighted(double x, double tau_over_z){
 	return 1./x*charge_factor*sum_pdf;
 }
 //qq + qbarqbar +qqbar (identical+non-identical!), use it for DeltaNNLOC2
-double pdf_sum_qq_charge_weighted_double(double x, double tau_over_z){ 
+double pdf_sum_qq_charge_weighted_double(double x, double tau_over_z){
 	double sum_pdf(0);
 	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
 	if(x < tau_over_z){return 0;}
@@ -59,7 +59,7 @@ double pdf_sum_qq_charge_weighted_double(double x, double tau_over_z){
 	return 1./x*sum_pdf;
 }
 //qq + qbarqbar +qqbar (identical+non-identical!), use it for DeltaNNLOCE
-double pdf_sum_qq_charge_weighted_single(double x, double tau_over_z){ 
+double pdf_sum_qq_charge_weighted_single(double x, double tau_over_z){
 	double sum_pdf(0);
 	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
 	if(x < tau_over_z){return 0;}
@@ -72,7 +72,7 @@ double pdf_sum_qq_charge_weighted_single(double x, double tau_over_z){
 
 
 //qq + qbarqbar + qqbar (identical+nonidentical!), use it for DeltaNNLOCD
-double pdf_sum_qq_charge_weighted_double_vivj(double x, double tau_over_z){ 
+double pdf_sum_qq_charge_weighted_double_vivj(double x, double tau_over_z){
 	double sum_pdf(0);
 	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
 	if(x < tau_over_z){return 0;}
@@ -88,7 +88,7 @@ double pdf_sum_qq_charge_weighted_double_vivj(double x, double tau_over_z){
 
 
 //qq + qbarqbar + qqbar (identical only), use it for DeltaNNLOCF
-double pdf_sum_qq_charge_weighted_single_vivi(double x, double tau_over_z){ 
+double pdf_sum_qq_charge_weighted_single_vivi(double x, double tau_over_z){
 	double sum_pdf(0);
 	double eq[5] = {-1./3.,2./3,-1./3.,2./3.,-1./3.}; //these are the charges
 	if(x < tau_over_z){return 0;}
@@ -229,6 +229,19 @@ double derivative_qg_pdf_jac(double x, double z, double tau, double eps){
 	return (jacp/(zpeps)*pdf_sum_qg_charge_weighted(xpeps,tau/(zpeps))-jacm/(zmeps)*pdf_sum_qg_charge_weighted(xmeps,tau/(zmeps)))/(2.*eps); //numerical derivative
 }
 
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+/// numerical derivative of gg (for di-higgs)
+////////////////////////////////////////////////////////////////////////////////////////
+double derivative_gg_pdf(double x, double tau, double eps){
+	eps = 1.E-6;
+	double taupeps = tau + eps;
+	double taumeps = tau - eps;
+	return (pdf_sum_gg(x, taupeps) - pdf_sum_gg(x,taumeps))/(2.*eps); 
+}
+
+
 ///////////////////////////////////
 /// checks for conservation charge
 ///////////////////////////////////
@@ -241,7 +254,7 @@ double vegas_pdf_up_minus_upbar(double *k, size_t dim, void *params){
 
 ///////////////////////////////////
 /// checks for momentum cons.
-///////////////////////////////////
+/////////////////////////////////// 
 double vegas_pdf_mom_consv(double *k, size_t dim, void *params){
 	(void)(dim);
 	(void)(params);
@@ -251,4 +264,33 @@ double vegas_pdf_mom_consv(double *k, size_t dim, void *params){
 	}
 	sum_pdf+=pdfs[0]->xfxQ(21,k[0],muF);
 	return sum_pdf;
+}
+
+/////////////////////////////////////
+/// lumi checks
+/////////////////////////////////////
+double vegas_lumi_gg(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	return pdf_sum_gg(k[0],tau);
+}
+double vegas_lumi_qg(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	return pdf_sum_qg(k[0],tau);
+}
+double vegas_lumi_qqbar(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	return pdf_sum_qqbar(k[0],tau);
+}
+double vegas_lumi_qq(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	return pdf_sum_qq(k[0],tau);
+}
+double vegas_lumi_qqNI(double *k, size_t dim, void *params){
+	(void)(dim);
+	(void)(params);
+	return pdf_sum_qqNI(k[0],tau);
 }

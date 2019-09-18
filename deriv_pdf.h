@@ -23,7 +23,15 @@ double pdf_sum_qqNI(double x, double tau_over_z);
 
 //derivatives (only with photon)
 double derivative_qg_pdf(double x, double z, double tau, double eps= 0.0001);
+double derivative_gg_pdf(double x, double tau, double eps= 0.0001);
 double derivative_qg_pdf_jac(double x, double z, double tau, double eps= 0.0001);
 double vegas_pdf_up_minus_upbar(double *k, size_t dim, void *params);
 double vegas_pdf_mom_consv(double *k, size_t dim, void *params);
+
+// lumi functions
+double vegas_lumi_gg(double *k, size_t dim, void *params);
+double vegas_lumi_qg(double *k, size_t dim, void *params);
+double vegas_lumi_qqbar(double *k, size_t dim, void *params);
+double vegas_lumi_qq(double *k, size_t dim, void *params);
+double vegas_lumi_qqNI(double *k, size_t dim, void *params);
 #endif

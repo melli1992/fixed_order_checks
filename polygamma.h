@@ -10,7 +10,8 @@
 #ifndef POLYGAM_H
 #define POLYGAM_H
 
-double Li2(double x);
+double li2(double x);
+std::complex<double> dilog(std::complex<double> x); // when it is complex!
 double Li3(double x);
 double S12(double x);
 double clenshaw(std::vector<double> coeff, double x);

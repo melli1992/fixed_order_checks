@@ -27,9 +27,14 @@ extern double muF2;
 extern double muR;
 extern double muR2;
 extern double pbunits;
+extern double fbunits;
 
 extern double quarkmasses[2];
+extern double mt;
+extern double mt2;
 extern double mH;
+extern double mH2;
+extern double GammaH;
 extern double Lt;
 
 extern double M_gammaE;

@@ -11,7 +11,7 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////
 ///
-/// contains all K factors for higgs 
+/// contains all K factors for higgs
 /// split up in LO, NLO and power corrections
 /// also have two routines: either fitted pdfs or real ones
 ///
@@ -40,23 +40,6 @@ complex<double> AQ(double x){
 	if(x>=1){ return 3./2.*x*(1.+(1.-x)*pow(asin(1./sqrt(x)),2));}
 	if(x<1){ return 3./2.*x*(1.+(1.-x)*-1./4.*pow(log((1.+sqrt(1.-x))/(1.-sqrt(1.-x))-I*M_PI),2));}
 }
-////////////////////////////////////////////////////////////////
-/// constant delta contribution
-////////////////////////////////////////////////////////////////
-double vegas_higgs_LO(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double result = higgs_LO_factor()*(pdf_sum_gg(k[0],tau));
-	if (isnan(result)){return 0;}
-	else{return result;}
-}
-double vegas_higgs_LO_fit(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double result = higgs_LO_factor()*real(fit_sum_gg(k[0],tau));
-	if (isnan(result)){return 0;}
-	else{return result;}
-}
 
 /////////////////////////////////////////////////////////////////////////////////////////
 /// NLO
@@ -65,105 +48,6 @@ double vegas_higgs_LO_fit(double *k, size_t dim, void *params){
 ///////////////////////////
 /// gg channel
 ///////////////////////////
-
-/////////// integration routines
-
-double vegas_higgs_NLO_gg_zdep(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-
-	double z = k[0];
-	double jacobian = 1.-tau/z; 
-	double x = tau/z+k[1]*jacobian;
-	
-	
-	double result = higgs_LO_factor()*(higgs_NLO_gg_reg(z)*jacobian*real(pdf_sum_gg(x,tau/z))/z+higgs_NLO_gg_plus(z)*(jacobian*real(pdf_sum_gg(x,tau/z))/z-(1.-tau)*real(pdf_sum_gg(tau+k[1]*(1.-tau),tau))));
-	if (isnan(result)){return 0;}
-	else{return result;}
-}
-double vegas_higgs_NLO_gg_zdep_fit(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-
-	double z = k[0];
-	double jacobian = 1.-tau/z; 
-	double x = tau/z+k[1]*jacobian;
-	
-	double result = higgs_LO_factor()*(higgs_NLO_gg_reg(z)*jacobian*real(fit_sum_gg(x,tau/z))/z+higgs_NLO_gg_plus(z)*(jacobian*real(fit_sum_gg(x,tau/z))/z-(1.-tau)*real(fit_sum_gg(tau+k[1]*(1.-tau),tau))));
-	
-	if (isnan(result)){return 0;}
-	else{return result;}
-}
-double vegas_higgs_NLO_gg_zdepcorr(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-
-	double z = k[0]; // from 0 to tau
-	double jacobian = 1.-tau; 
-	double x = tau+k[1]*jacobian;
-	double result =  higgs_LO_factor()*(higgs_NLO_gg_plus(z))*jacobian*(-pdf_sum_gg(x,tau));
-	
-	if (isnan(result)){return 0;}
-	else{return result;}
-}
-double vegas_higgs_NLO_gg_zdepcorr_fit(double *k, size_t dim, void *params){ /*correction from not integrating from 0 to 1 but tau to 1*/
-	(void)(dim);
-	(void)(params);
-
-	double z = k[0]; // from 0 to tau
-	double jacobian = 1.-tau; 
-	double x = tau+k[1]*jacobian;
-	double result =  higgs_LO_factor()*(higgs_NLO_gg_plus(z))*jacobian*(-real(fit_sum_gg(x,tau)));
-	if (isnan(result)){return 0;}
-	else{return result;}
-}
-double vegas_higgs_NLO_gg_delta(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double result = higgs_LO_factor()*higgs_NLO_gg_delta()*real(pdf_sum_gg(k[0],tau));
-	if (isnan(result)){return 0;}
-	else{return result;}
-}
-double vegas_higgs_NLO_gg_delta_fit(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double result = higgs_LO_factor()*higgs_NLO_gg_delta()*real(fit_sum_gg(k[0],tau));
-	if (isnan(result)){return 0;}
-	else{return result;}
-}
-double vegas_higgs_NLO_gg_LP(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return higgs_LO_factor()*(higgs_NLO_gg_plus(z))*(jacobian*pdf_sum_gg(tau/z+k[1]*jacobian,tau/z)/z - (1.-tau)*pdf_sum_gg(tau+k[1]*(1.-tau),tau));
-}
-double vegas_higgs_NLO_gg_LP_fit(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return higgs_LO_factor()*(higgs_NLO_gg_plus(z))*(jacobian*real(fit_sum_gg(tau/z+k[1]*jacobian,tau/z))/z - (1.-tau)*(real(fit_sum_gg(tau+k[1]*(1.-tau),tau))));
-}
-double vegas_higgs_NLO_gg_power(double *k, size_t dim, void *params){
-	(void)(dim);
-	struct lumni_params * fp = (struct lumni_params *)params;
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return higgs_LO_factor()*(higgs_NLO_gg_expansion(z, fp->power))*(jacobian*pdf_sum_gg(tau/z+k[1]*jacobian,tau/z)/z);
-}
-double vegas_higgs_NLO_gg_power_fit(double *k, size_t dim, void *params){
-	(void)(dim);
-	struct lumni_params * fp = (struct lumni_params *)params;
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return higgs_LO_factor()*(higgs_NLO_gg_expansion(z, fp->power))*(jacobian*real(fit_sum_gg(tau/z+k[1]*jacobian,tau/z))/z);
-}
-
 /// and the NLO functions
 //https://arxiv.org/pdf/0809.4283.pdf eqn. 9 with extra 1/x (see eqn. 1)
 double higgs_NLO_gg_reg(double x){
@@ -173,7 +57,7 @@ double higgs_NLO_gg_reg(double x){
 double higgs_NLO_gg_plus(double x){
 	return alphas_muR/M_PI*((12.*log(1.-x)+6.*log(Q2/muF2))/(1.-x));
 }
-//https://arxiv.org/pdf/0809.4283.pdf eqn. 7 (see eqn. 1) 
+//https://arxiv.org/pdf/0809.4283.pdf eqn. 7 (see eqn. 1)
 double higgs_NLO_gg_delta(){
 	return alphas_muR/M_PI*(11./2.+pow(M_PI,2));
 }
@@ -222,46 +106,11 @@ double higgs_NLO_gg_expansion(double x, int power){
 ///////////////////////////
 /// qg channel
 ///////////////////////////
-
-/////////// integration routines
-double vegas_higgs_NLO_qg_full(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return higgs_LO_factor()*(higgs_NLO_qg_full(z))*(jacobian*pdf_sum_qg(tau/z+k[1]*jacobian,tau/z)/z);
-}
-double vegas_higgs_NLO_qg_full_fit(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return higgs_LO_factor()*(higgs_NLO_qg_full(z))*(jacobian*real(fit_sum_qg(tau/z+k[1]*jacobian,tau/z))/z);
-}
-double vegas_higgs_NLO_qg_power(double *k, size_t dim, void *params){
-	(void)(dim);
-	struct lumni_params * fp = (struct lumni_params *)params;
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return higgs_LO_factor()*(higgs_NLO_qg_expansion(z, fp->power))*(jacobian*pdf_sum_qg(tau/z+k[1]*jacobian,tau/z)/z);
-}
-double vegas_higgs_NLO_qg_power_fit(double *k, size_t dim, void *params){
-	(void)(dim);
-	struct lumni_params * fp = (struct lumni_params *)params;
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return higgs_LO_factor()*(higgs_NLO_qg_expansion(z, fp->power))*(jacobian*real(fit_sum_qg(tau/z+k[1]*jacobian,tau/z))/z);
-}
-
 ///// NLO functions
 double higgs_NLO_qg_full(double x){
 	return (alphas_muR*(-3 - (-6 + x)*x + 2*(2 + (-2 + x)*x)*log(Q2/muF2) + 4*(2 + (-2 + x)*x)*log(1 - x) - 2*(2 + (-2 + x)*x)*log(x)))/(3.*M_PI*x);
 }
-double higgs_NLO_qg_expansion(double x, int power){		
+double higgs_NLO_qg_expansion(double x, int power){
 	if(power==1){
 		return (2*alphas_muR*(1 + log(Q2/muF2) + 2*log(1 - x)))/(3.*M_PI);
 	}
@@ -306,46 +155,11 @@ double higgs_NLO_qg_expansion(double x, int power){
 ///////////////////////////
 /// qqbar channel
 ///////////////////////////
-
-/////////// integration routines
-double vegas_higgs_NLO_qqbar_full(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return higgs_LO_factor()*(higgs_NLO_qqbar_full(z))*(jacobian*pdf_sum_qqbar(tau/z+k[1]*jacobian,tau/z)/z);
-}
-double vegas_higgs_NLO_qqbar_full_fit(double *k, size_t dim, void *params){
-	(void)(dim);
-	(void)(params);
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return higgs_LO_factor()*(higgs_NLO_qqbar_full(z))*(jacobian*real(fit_sum_qqbar(tau/z+k[1]*jacobian,tau/z))/z);
-}
-double vegas_higgs_NLO_qqbar_power(double *k, size_t dim, void *params){
-	(void)(dim);
-	struct lumni_params * fp = (struct lumni_params *)params;
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return higgs_LO_factor()*(higgs_NLO_qqbar_expansion(z, fp->power))*(jacobian*pdf_sum_qqbar(tau/z+k[1]*jacobian,tau/z)/z);
-}
-double vegas_higgs_NLO_qqbar_power_fit(double *k, size_t dim, void *params){
-	(void)(dim);
-	struct lumni_params * fp = (struct lumni_params *)params;
-	double z = k[0];
-	double jacobian = 1.-tau/z; //needed to transform the boundary dependent terms
-	double x = tau/z+k[1]*jacobian;
-	return higgs_LO_factor()*(higgs_NLO_qqbar_expansion(z, fp->power))*(jacobian*real(fit_sum_qqbar(tau/z+k[1]*jacobian,tau/z))/z);
-}
-
 ///// NLO functions
 double higgs_NLO_qqbar_full(double x){
 	return (-32*alphas_muR*pow(-1 + x,3))/(27.*M_PI*x);
 }
-double higgs_NLO_qqbar_expansion(double x, int power){		
+double higgs_NLO_qqbar_expansion(double x, int power){
 	if(power==1){
 		return 0;
 	}

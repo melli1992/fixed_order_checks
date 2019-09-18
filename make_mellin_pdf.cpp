@@ -70,7 +70,7 @@ int main(int argc, char* argv[]){
 	x_convert << alphas_Q;
 	string asstring  = x_convert.str();
 	//string q2_str = "fit_pdfs/"+setname+"/muF" + Qstring +"_"+setname;
-	string q2_str = "fit_pdfs/"+setname+"/muF" + to_string((float) Q) +"_"+setname;
+	string q2_str = "fit_pdfs/"+setname+"/muF" + to_string((int) Q) +"_"+setname;
 	
 	q2_str = q2_str + "_pdfoutput.txt";
 	
@@ -94,8 +94,9 @@ int main(int argc, char* argv[]){
 			xfx.push_back(pdfs[imem]->xfxQ(flav,i,muF));
 			//cout << pdfs[imem]->type() << endl;
 			}
+			
 			const LHAPDF::PDFUncertainty xErr = setk.uncertainty(xfx, -1);
-			output2 << i << " " << (xErr.central) << " " << (xErr.errsymm) << " " << xErr.errplus << " " << xErr.errminus << endl;
+			output2 << i << " " << (xErr.central) << " " << (xErr.errsymm) << " " << xErr.errplus << " " << xErr.errminus << " " << (xfx[0]) << endl;
 
 			if (counter == 100) {
 				increment *= 10;

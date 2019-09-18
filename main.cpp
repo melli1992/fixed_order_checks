@@ -62,6 +62,8 @@ int main(int argc, char* argv[]){
 	string Qstring  = x_convert.str();
 	x_convert << alphas_Q;
 	string asstring  = x_convert.str();
+	complex<double> x =0.1;
+	cout << xfit_pdfs(7, x) << endl;
 	double z;
 	double eta = 1.5;
 	lumni_params params = {z, Q, 2*Q/S, exp(eta), exp(-eta), 0,0,0};
