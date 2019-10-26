@@ -21,6 +21,10 @@ double pdf_sum_gg(double x, double tau_over_z);
 double pdf_sum_qq(double x, double tau_over_z);
 double pdf_sum_qqNI(double x, double tau_over_z);
 
+// up and down seperately
+double pdf_sum_qqbarUP(double x, double tau_over_z);
+double pdf_sum_qqbarDOWN(double x, double tau_over_z);
+
 //derivatives (only with photon)
 double derivative_qg_pdf(double x, double z, double tau, double eps= 0.0001);
 double derivative_gg_pdf(double x, double tau, double eps= 0.0001);

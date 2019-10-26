@@ -6,8 +6,8 @@ tryloop.o: tryloop.cpp
 	g++ -c tryloop.cpp -I/home/mbeekveld/LoopTools-2.15/x86_64-Linux/include -I/home/mbeekveld/Cuba/include  -Wreturn-local-addr -O3 -I/home/mbeekveld/LHAPDF/include -std=c++11
 
 
-resum: resum.o k_factors_nnlo_higgs.o resum_functions.o pf_pdf.o mellin_pdf.o mellin_functions.o deriv_pdf.o monte_carlo.o parameters.o k_factors_dy.o k_factors_higgs.o k_factors_dihiggs.o k_factors_prompt_photon.o polygamma.o k_factors_nnlo_dy.o
-	g++ -o resum k_factors_nnlo_higgs.o resum.o mellin_pdf.o resum_functions.o mellin_functions.o pf_pdf.o deriv_pdf.o monte_carlo.o parameters.o k_factors_dy.o k_factors_higgs.o k_factors_dihiggs.o k_factors_prompt_photon.o polygamma.o k_factors_nnlo_dy.o -Wall -Wextra -lgsl -lgslcblas -lm -lcuba -L/home/mbeekveld/Cuba/lib  -Wreturn-local-addr -L/home/mbeekveld/LHAPDF/lib -lLHAPDF  -L/home/mbeekveld/LoopTools-2.15/x86_64-Linux/lib64 -looptools -lgfortran
+resum: cuba_integration.o resum.o k_factors_nnlo_higgs.o resum_functions.o pf_pdf.o mellin_pdf.o mellin_functions.o deriv_pdf.o monte_carlo.o parameters.o k_factors_dy.o k_factors_higgs.o k_factors_dihiggs.o k_factors_diboson.o k_factors_prompt_photon.o polygamma.o k_factors_nnlo_dy.o
+	g++ -o resum cuba_integration.o k_factors_nnlo_higgs.o resum.o mellin_pdf.o resum_functions.o mellin_functions.o pf_pdf.o deriv_pdf.o monte_carlo.o parameters.o k_factors_dy.o k_factors_higgs.o k_factors_dihiggs.o k_factors_diboson.o k_factors_prompt_photon.o polygamma.o k_factors_nnlo_dy.o -Wall -Wextra -lgsl -lgslcblas -lm -lcuba -L/home/mbeekveld/Cuba/lib  -Wreturn-local-addr -L/home/mbeekveld/LHAPDF/lib -lLHAPDF  -L/home/mbeekveld/LoopTools-2.15/x86_64-Linux/lib64 -looptools -lgfortran
 
 
 
@@ -56,6 +56,8 @@ k_factors_higgs.o: k_factors_higgs.cpp
 	g++ -c k_factors_higgs.cpp -I/home/mbeekveld/Cuba/include  -Wreturn-local-addr -O3 -I/home/mbeekveld/LHAPDF/include -std=c++11
 k_factors_dihiggs.o: k_factors_dihiggs.cpp
 	g++ -c k_factors_dihiggs.cpp -I/home/mbeekveld/Cuba/include  -Wreturn-local-addr -O3 -I/home/mbeekveld/LHAPDF/include -std=c++11  -I/home/mbeekveld/LoopTools-2.15/x86_64-Linux/include
+k_factors_diboson.o: k_factors_diboson.cpp
+		g++ -c k_factors_diboson.cpp -I/home/mbeekveld/Cuba/include  -Wreturn-local-addr -O3 -I/home/mbeekveld/LHAPDF/include -std=c++11  -I/home/mbeekveld/LoopTools-2.15/x86_64-Linux/include
 
 resum_functions.o: resum_functions.cpp
 	g++ -c resum_functions.cpp -I/home/mbeekveld/Cuba/include  -Wreturn-local-addr -O3 -I/home/mbeekveld/LHAPDF/include -std=c++11

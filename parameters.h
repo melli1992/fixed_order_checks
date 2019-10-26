@@ -32,8 +32,14 @@ extern double fbunits;
 extern double quarkmasses[2];
 extern double mt;
 extern double mt2;
+extern double mb;
+extern double mb2;
+extern double mZ2;
+extern double mW2;
 extern double mH;
 extern double mH2;
+extern double mHeavy2;
+extern double mA2;
 extern double GammaH;
 extern double Lt;
 
@@ -52,11 +58,41 @@ extern double alphaEM;
 extern double GF;
 extern double nF;
 
-
 extern double b0;
 extern double b1;
 extern double b2;
 extern double beta0;
+//for W+W-, ZZ
+extern double sinw;
+extern double cosw;
+extern double e;
+extern double ez;
+extern double guL;
+extern double guR;
+extern double gdL;
+extern double gdR;
+extern double gVu;
+extern double gAu;
+extern double gVd;
+extern double gAd;
+extern double ctt;
+//for SUSY dihiggs;
+
+extern double ght;
+extern double gHt;
+extern double gAt;
+extern double ghb;
+extern double gHb;
+extern double gAb;
+extern double lambdaZAh;
+extern double lambdaZAH;
+extern double lambdahhh;
+extern double lambdaHhh;
+extern double lambdaHHh;
+extern double lambdaHHH;
+extern double lambdahAA;
+extern double lambdaHAA;
+
 
 extern double ISLL;
 extern double ISNLL;
@@ -83,12 +119,14 @@ extern double D3higgs;
 extern std::string setname;
 extern std::vector<LHAPDF::PDF*> pdfs; //pdf vector
 extern double xmin_pdfs, xmax_pdfs; //min x, max x
+extern int use_member; //the member that one needs to use
 struct lumni_params {double z; double pT; double xT; double epeta; double emeta; int power; int flavor; int coefficient;};
 
-extern bool DY, higgs, PF, LO, NLO, NNLO, RES, realPDF, fitPDF;
+extern bool DY, higgs, hh, WW, ZZ, diff, full, PF, LO, NLO, NNLO, RES, realPDF, fitPDF;
 
 void print_usage();
 void update_defaults(bool printout = true , bool pdfset = true);
+void set_SUSY(int set, bool printout = true);
 void read_arguments(int argc, char* argv[]);
 
 extern std::unordered_map<double, std::vector<std::vector<double>>> fitcoeff;

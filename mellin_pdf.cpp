@@ -40,9 +40,19 @@ complex<double> mellin_pdf_sum_qqbar_charge_weighted(double x1, double x2, compl
 	return sum_pdf;
 }
 // numerical derivative
+double deriv_xpdf(int i, double x, double eps){
+	try{
+		return ((pdfs[use_member]->xfxQ(i,x+eps,muF))-(pdfs[use_member]->xfxQ(i,x-eps,muF)))/(2.*eps);
+	}
+	catch (exception& e)
+  {
+    return 0;
+  }
+}
+// numerical derivative
 double deriv_pdf(int i, double x, double eps){
 	try{
-		return ((pdfs[0]->xfxQ(i,x+eps,muF)/(x+eps))-(pdfs[0]->xfxQ(i,x-eps,muF)/(x-eps)))/(2.*eps);
+		return ((pdfs[use_member]->xfxQ(i,x+eps,muF)/(x+eps))-(pdfs[use_member]->xfxQ(i,x-eps,muF)/(x-eps)))/(2.*eps);
 	}
 	catch (exception& e)
   {
@@ -169,17 +179,41 @@ complex<double> fit_sum_qqbar(complex<double> x1, complex<double> x2){
 	return 1./x1*sum_pdf;
 }
 complex<double> fit_sum_qqNI(complex<double> x1, complex<double> x2){
+	//int l = 0;
 	complex<double> sum_pdf(0);
-	for(int i = 1; i <=5; i++){
-		for(int j = 1; j <=5; j++){
-			if(i>=j){continue;} //to avoid double counting!
-			sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5+i,x1)*xfit_pdfs(5+j,x2/x1)+xfit_pdfs(5+j,x1)*xfit_pdfs(5+i,x2/x1));
-			sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5-i,x1)*xfit_pdfs(5-j,x2/x1)+xfit_pdfs(5-j,x1)*xfit_pdfs(5-i,x2/x1));
+	for(int i = -5; i <=5; i++){
+		for(int j = -5; j <=5; j++){
+			if(abs(i)==abs(j)){continue;}
+			if(i == 0){continue;}
+			if(j == 0){continue;}
+			//l += 1; //to avoid double counting!
+			sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5+i,x1)*xfit_pdfs(5+j,x2/x1));
 		}
 	}
+	//cout << l << endl;
 	return 1./x1*sum_pdf;
 }
 
+
+complex<double> fit_sum_qqbarUP(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);
+	int i = 2;
+	sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5-i,x1)*xfit_pdfs(5+i,x2/x1)+xfit_pdfs(5+i,x1)*xfit_pdfs(5-i,x2/x1));
+	i = 4;
+	sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5-i,x1)*xfit_pdfs(5+i,x2/x1)+xfit_pdfs(5+i,x1)*xfit_pdfs(5-i,x2/x1));
+	return 1./x1*sum_pdf;
+}
+
+complex<double> fit_sum_qqbarDOWN(complex<double> x1, complex<double> x2){
+	complex<double> sum_pdf(0);
+	int i = 1;
+	sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5-i,x1)*xfit_pdfs(5+i,x2/x1)+xfit_pdfs(5+i,x1)*xfit_pdfs(5-i,x2/x1));
+	i = 3;
+	sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5-i,x1)*xfit_pdfs(5+i,x2/x1)+xfit_pdfs(5+i,x1)*xfit_pdfs(5-i,x2/x1));
+	i = 5;
+	sum_pdf+= 1./x1*1./(x2/x1)*(xfit_pdfs(5-i,x1)*xfit_pdfs(5+i,x2/x1)+xfit_pdfs(5+i,x1)*xfit_pdfs(5-i,x2/x1));
+	return 1./x1*sum_pdf;
+}
 
 /////////////////////////////////////////////////////////////////////////////////
 /// this is the convolution directly in N-space
@@ -200,6 +234,22 @@ complex<double> fit_mellin_pdf_sum_gg(complex<double> Nint){
 	sum_pdf+= xfit_Nspace_pdfs(5,Nint)*xfit_Nspace_pdfs(5,Nint);
 	return sum_pdf;
 }
+
+
+complex<double> fit_mellin_pdf_sum_qqbarUP(complex<double> Nint){
+	complex<double> sum_pdf(0,0);
+	sum_pdf+= 2.*xfit_Nspace_pdfs(5+2,Nint)*xfit_Nspace_pdfs(5-2,Nint);
+	sum_pdf+= 2.*xfit_Nspace_pdfs(5+4,Nint)*xfit_Nspace_pdfs(5-4,Nint);
+	return sum_pdf;
+}
+
+complex<double> fit_mellin_pdf_sum_qqbarDOWN(complex<double> Nint){
+	complex<double> sum_pdf(0,0);
+	sum_pdf+= 2.*xfit_Nspace_pdfs(5+1,Nint)*xfit_Nspace_pdfs(5-1,Nint);
+	sum_pdf+= 2.*xfit_Nspace_pdfs(5+3,Nint)*xfit_Nspace_pdfs(5-3,Nint);
+	sum_pdf+= 2.*xfit_Nspace_pdfs(5+5,Nint)*xfit_Nspace_pdfs(5-5,Nint);
+	return sum_pdf;
+}
 /// ---------------------------------------------------------------------------------------------
 
 
@@ -212,10 +262,56 @@ complex<double> xfit_pdfs(int i, complex<double> x){
 	complex<double> y = 1.-2.*pow(x,0.5);
 	return fitcoeff[muF][i][0]*pow(1.-x,fitcoeff[muF][i][1])*pow(x,fitcoeff[muF][i][2])*(1.+fitcoeff[muF][i][3]*y+fitcoeff[muF][i][4]*(2.*pow(y,2)-1.))+fitcoeff[muF][i][5]*pow(1.-x,fitcoeff[muF][i][6])*pow(x,fitcoeff[muF][i][7])*(1.+ fitcoeff[muF][i][8]*pow(x,fitcoeff[muF][i][9]));
 }
+//this is the derivative
+complex<double> Dxfit_pdfs(int i, complex<double> x){
+	double A = fitcoeff[muF][i][0];
+	double x3 = fitcoeff[muF][i][1];
+	double x4 = fitcoeff[muF][i][2];
+	double x5 = fitcoeff[muF][i][3];
+	double x6 = fitcoeff[muF][i][4];
+	double B = fitcoeff[muF][i][5];
+	double x7 = fitcoeff[muF][i][6];
+	double x8 = fitcoeff[muF][i][7];
+	double C = fitcoeff[muF][i][8];
+	double x9 = fitcoeff[muF][i][9];
+	return A*pow(1. - x,x3)*pow(x,x4)*(-x5*pow(x,-0.5) + 8.*x6 - (4.*x6)*pow(x,-0.5))  
+			- A*pow((1. - x),(-1. + x3))*pow(x,x4)*x3*(1. + x5 - 2.*pow(x,0.5)*x5 + x6 - 8.*pow(x,0.5)*x6 + 8.*x*x6) 
+			+ A*pow((1. - x),x3)*pow(x,(-1. + x4))*x4*(1. + x5 - 2.*pow(x,0.5)*x5 + x6 - 8.*pow(x,0.5)*x6 + 8.*x*x6) 
+			- B*pow((1. - x),(-1. + x7))*pow(x,x8)*(1. + C*pow(x,x9))*x7 
+			+ B*pow((1. - x),x7)*pow(x,(-1. + x8))*(1. + C*pow(x,x9))*x8 
+			+ B*C*pow((1. - x),x7)*pow(x,(-1. + x8 + x9))*x9;
+}
+//numerical derivative
+complex<double> NDxfit_pdfs(int i, complex<double> x, double eps){
+	return (xfit_pdfs(i, x+eps)-xfit_pdfs(i, x-eps))/(2.*eps);
+}
+
 // this is fx(x)
 complex<double> fit_pdfs(int i, complex<double> x){
 	complex<double> y = 1.-2.*pow(x,0.5);
 	return 1./x*(fitcoeff[muF][i][0]*pow(1.-x,fitcoeff[muF][i][1])*pow(x,fitcoeff[muF][i][2])*(1.+fitcoeff[muF][i][3]*y+fitcoeff[muF][i][4]*(2.*pow(y,2)-1.))+fitcoeff[muF][i][5]*pow(1.-x,fitcoeff[muF][i][6])*pow(x,fitcoeff[muF][i][7])*(1.+ fitcoeff[muF][i][8]*pow(x,fitcoeff[muF][i][9])));
+}
+//this is the derivative
+complex<double> Dfit_pdfs(int i, complex<double> x){
+	double A = fitcoeff[muF][i][0];
+	double x3 = fitcoeff[muF][i][1];
+	double x4 = fitcoeff[muF][i][2];
+	double x5 = fitcoeff[muF][i][3];
+	double x6 = fitcoeff[muF][i][4];
+	double B = fitcoeff[muF][i][5];
+	double x7 = fitcoeff[muF][i][6];
+	double x8 = fitcoeff[muF][i][7];
+	double C = fitcoeff[muF][i][8];
+	double x9 = fitcoeff[muF][i][9];
+	return -((1./pow(x,2))*(A*pow((1. - x),(-1. + x3))*pow(x,x4)*(8.*pow(x,2)*(x3 + x4)*x6 - (-1. + x4)*(1. + x5 + x6) 
+																	+ pow(x,0.5)*(-1. + 2.*x4)*(x5 + 4.*x6) 
+																	- pow(x,(3./2.))*(-1. + 2.*x3 + 2.*x4)*(x5 + 4.*x6) 
+																	+ x*(-1. + x4 - x5 + x4*x5 - x6 - 7.*x4*x6 +  x3*(1. + x5 + x6))) 
+						+ B*pow((1. - x),(-1. + x7))*pow(x,x8)*(1. - x8 + x*(-1. + x7 + x8) - C*pow(x,x9)*(-1. + x8 + x9) + C*pow(x,(1. + x9))*(-1. + x7 + x8 + x9))));
+}
+//numerical derivative
+complex<double> NDfit_pdfs(int i, complex<double> x, double eps){
+	return (fit_pdfs(i, x+eps)-fit_pdfs(i, x-eps))/(2.*eps);
 }
 // this is xfx(N) (mellin transform) checked that it gives the same answer when it is tranformed back to x-space
 // note that if fx(N) is needed, then N-> N-1 works
@@ -230,6 +326,7 @@ complex<double> xfit_Nspace_pdfs(int i, complex<double> N){
 	double x8 = fitcoeff[muF][i][7];
 	double C = fitcoeff[muF][i][8];
 	double x9 = fitcoeff[muF][i][9];
+
 	// these are optional, it looks like the bended contour now doesnt perform so well anymore
 	// although it gets better for higher CMP (as expected)
 	// checked that we can take these out, then it still works (it is quicker that way, as it doesn't have to evaluate the if statements)

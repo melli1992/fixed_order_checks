@@ -68,43 +68,6 @@ exit(0);}
 		return integrand;
 }
 
-//////////////////////////////////////////////////////////////////////
-/// initializes the function to integrate in the resummed cases
-//////////////////////////////////////////////////////////////////////
-functionint init_vegas_mellin(std::string process, std::string order){
-	functionint integrand;
-	if(process == "test"){ //test cases for full, derivative method, deformation method and the direct N space formula
-		if (process == "full"){
-			integrand.G.f =&vegas_fofx2_full;
-			integrand.G.dim = 2;
-			integrand.xl = {0.,0.};
-			integrand.xu = {1.,1.};
-		}
-		else if (process == "deriv"){
-			integrand.G.f =&vegas_fofx2_deriv;
-			integrand.G.dim = 2;
-			integrand.xl = {0.,0.};
-			integrand.xu = {1.,1.};
-		}
-		else if (process == "defor"){
-			integrand.G.f =&vegas_fofx2_defor;
-			integrand.G.dim = 2;
-			integrand.xl = {0.,-1.};
-			integrand.xu = {1.,0.};
-		}
-		else if (process == "nspace"){
-			integrand.G.f =&vegas_fofx2_Nspace;
-			integrand.G.dim = 1;
-			integrand.xl = {0.};
-			integrand.xu = {1.};
-		}
-	}
-	else{cout << "Process " << process <<" is not implemented" << endl; exit(0);}
-
-
-	return integrand;
-}
-
 /////////////////////////////////////////////////////////
 /// initializes the function to integrate in the photon case
 /////////////////////////////////////////////////////////
