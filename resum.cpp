@@ -52,8 +52,8 @@ int main(int argc, char* argv[]){
 	/// predefinition of everything, setting it up
 	//////////////////////////////////////////////
 	read_arguments(argc,argv);
-	bool PDFmemuse = true;
-    double scales[17] = {5000,2500,2000,1500,1000,750,500,400,300,200,150,125,100,75,50,25,10};
+	bool PDFmemuse = false;
+    double scales[20] = {1000,900,800,750,700,650,600,550,500,480,450,420,400,390,370,350,330,300,270,260};
   // check whether the factorization scale is there
 	ltini();
 	bool TEST = false;
@@ -79,6 +79,71 @@ int main(int argc, char* argv[]){
 			}
 		}
 	}*/
+	/*
+	ofstream output2;
+	string q_str2 = "DihiggsSUSY3.txt";
+	output2.open(q_str2.c_str()); //.c_str() needed to do a constant string conversion
+	cout << q_str2 << endl;
+
+	Q = 2.*sqrt(mH2);
+	muF = Q;
+	muR = Q;
+	update_defaults();
+	vector<results_c> diboson_LO_qqbar_full;
+	set_SUSY(200,true);
+	output2 << ", SUSY and mA2 = " << mA2 << endl;
+	diboson_LO_qqbar_full = call_cuhre_dihiggs("SUSY_hh","full",true);
+	output2 << diboson_LO_qqbar_full[0].res << " " <<  diboson_LO_qqbar_full[0].err << endl;
+
+	set_SUSY(950,true);
+	output2 << ", SUSY and mA2 = " << mA2 << endl;
+	diboson_LO_qqbar_full = call_cuhre_dihiggs("SUSY_hh","full",true);
+	output2 << diboson_LO_qqbar_full[0].res << " " <<  diboson_LO_qqbar_full[0].err << endl;
+	set_SUSY(5000,true);
+	output2 << ", SUSY and mA2 = " << mA2 << endl;
+	diboson_LO_qqbar_full = call_cuhre_dihiggs("SUSY_hh","full",true);
+	output2 << diboson_LO_qqbar_full[0].res << " " <<  diboson_LO_qqbar_full[0].err << endl;
+	output2.close();
+	exit(0);
+
+	for(int j = 0; j < 4; j++)
+	{
+		output2 << "j= " << j;
+		cout << "j = " << j;
+		//if(j==0) output2 << ", SM" << endl;
+		//if(j==1) { set_SUSY(200,true);
+		//			output2 << ", SUSY and mA2 = " << mA2 << endl;
+		//			}
+		if(j==0) { set_SUSY(950,true);
+					output2 << ", SUSY and mA2 = " << mA2 << endl;
+					}
+		if(j==1) { set_SUSY(5000,true);
+					output2 << ", SUSY and mA2 = " << mA2 << endl;
+					}
+		for(int i = 19; i > -1; i--){
+
+		/*if(j == 0){ Q = scales[i];
+					muF = Q;
+					muR = Q;
+					update_defaults(false);
+					diboson_LO_qqbar_full = call_cuhre_dihiggs("SM","diff",true);
+					output2 << "Q = " << Q << " GeV, " << diboson_LO_qqbar_full[0].res << " " <<  diboson_LO_qqbar_full[0].err << endl;
+					cout << "Q = " << Q << " GeV, " << diboson_LO_qqbar_full[0].res << " " <<  diboson_LO_qqbar_full[0].err << endl; }
+		if(j > -1)
+		{ 			Q = scales[i];
+					muF = Q;
+					muR = Q;
+					update_defaults(false);
+
+					diboson_LO_qqbar_full = call_cuhre_dihiggs("SUSY_hh","diff",true);
+					output2 << "Q = " << Q << " GeV, " << diboson_LO_qqbar_full[0].res << " " <<  diboson_LO_qqbar_full[0].err << endl;
+					cout << "Q = " << Q << " GeV, " << diboson_LO_qqbar_full[0].res << " " <<  diboson_LO_qqbar_full[0].err << endl;
+					}
+		}
+	}
+
+		output2.close();
+	exit(0);
 	//cout << fit_pdfs(5-i, x) << " " << Dfit_pdfs(5-i, x) << " " << NDfit_pdfs(5-i, x) << endl;
 	//cout << pdfs[0]->xfxQ(i,xd,muF)/x << " " << deriv_pdf(i, xd) << endl;
 	//exit(0);
@@ -92,7 +157,7 @@ int main(int argc, char* argv[]){
 	muF = Q;
 	muR = Q;
 	update_defaults();
-	
+
 	diboson_LO_qqbar_full = call_cuhre_dihiggs("SM","full",false);
 	cout << " SM hh =" << diboson_LO_qqbar_full[0].res << " " << diboson_LO_qqbar_full[0].err << " " << diboson_LO_qqbar_full[0].prob << endl;
 	diboson_LO_qqbar_full = call_cuhre_dihiggs("SUSY_hh","full",false);
@@ -103,7 +168,7 @@ int main(int argc, char* argv[]){
 	set_SUSY(5900,true);
 	diboson_LO_qqbar_full = call_cuhre_dihiggs("SUSY_hh","full",false);
 	cout << " hh =" << diboson_LO_qqbar_full[0].res << " " << diboson_LO_qqbar_full[0].err << " " << diboson_LO_qqbar_full[0].prob << endl;
-	
+
 	/*Q = sqrt(mH2)+sqrt(mHeavy2);
 	muF = Q;
 	muR = Q;
@@ -455,7 +520,17 @@ int main(int argc, char* argv[]){
 	string mufstring  = x_convert3.str();
 	string q_str = "output_Q" + Qstring +"_as"+asstring+"_"+setname+"_muF"+mufstring;
 	if(DY) q_str = q_str+"_DY";
-	else if(hh) q_str = q_str+"_dihiggs";
+	else if(hh && !SUSY) q_str = q_str+"_dihiggs";
+	else if(hh && SUSY){ q_str = q_str+"_dihiggsSUSY";
+							ostringstream x_convert4; // need this for the output
+							x_convert4 << SUSYset;
+							string SUS  = x_convert4.str();
+							q_str = q_str+"_MA"+SUS;
+							ostringstream x_convert5; // need this for the output
+							x_convert5 << tb;
+							string TA  = x_convert5.str();
+							q_str = q_str+"_tb"+TA;
+						}
 	else if(higgs) q_str = q_str+"_Higgs";
 	else if(WW) q_str = q_str+"_WW";
 	else if(ZZ) q_str = q_str+"_ZZ";
@@ -469,7 +544,7 @@ int main(int argc, char* argv[]){
 		if(full) q_str = q_str+"_full";
 		if(diff) q_str = q_str+"_diff";
 	}
-	if(PDFmemuse){q_str = q_str+"_members"; RES=false; fitPDF=false;} 
+	if(PDFmemuse){q_str = q_str+"_members"; RES=false; fitPDF=false;}
 	if(realPDF){q_str = q_str+"_real_pdfs"; RES=false; fitPDF=false;} //if real pdfs, the resummed cannot be used!
 	if(fitPDF){q_str = q_str+"_new_fitted_pdfs";}
 	if(RES) q_str = q_str+"_resummed";
@@ -488,10 +563,10 @@ int main(int argc, char* argv[]){
 		if((PDFmemuse == true) && (fitPDF == false))
 		{
 			for(int i = 0; i < 101;i++)
-				{	
+				{
 					use_member = i;
 					update_defaults();
-					
+
 					higgs_LO_gg_full.push_back(call_cuhre_higgs("LO","gg","LP",fitPDF)[0]);
 					res_higgs_NLO_gg_hard.push_back(call_cuhre_higgs("NLO","gg","reg",fitPDF)[0]);
 					res_higgs_NLO_gg_LP_part1.push_back(call_cuhre_higgs("NLO","gg","LP",fitPDF)[0]);
@@ -510,16 +585,16 @@ int main(int argc, char* argv[]){
 					res_higgs_NNLO_qqp_full.push_back(call_cuhre_higgs("NNLO","qqp","full",fitPDF)[0]);
 					res_higgs_NNLO_qqbar_full.push_back(call_cuhre_higgs("NNLO","qqbar","full",fitPDF)[0]);
 					res_higgs_NNLO_gg_LP.push_back({res_higgs_NNLO_gg_LP_part1[i].res + res_higgs_NNLO_gg_LP_cor[i].res, res_higgs_NNLO_gg_LP_part1[i].err + res_higgs_NNLO_gg_LP_cor[i].err, res_higgs_NNLO_gg_LP_part1[i].prob + res_higgs_NNLO_gg_LP_cor[i].prob});
-					higgs_NNLO_gg_full.push_back({res_higgs_NNLO_gg_hard[i].res+res_higgs_NNLO_gg_LP_cor[i].res+res_higgs_NNLO_gg_delta[i].res, res_higgs_NNLO_gg_hard[i].err+res_higgs_NNLO_gg_LP_cor[i].err+res_higgs_NNLO_gg_delta[i].err, res_higgs_NNLO_gg_hard[i].prob+res_higgs_NNLO_gg_LP_cor[i].prob+res_higgs_NNLO_gg_delta[i].prob});	
+					higgs_NNLO_gg_full.push_back({res_higgs_NNLO_gg_hard[i].res+res_higgs_NNLO_gg_LP_cor[i].res+res_higgs_NNLO_gg_delta[i].res, res_higgs_NNLO_gg_hard[i].err+res_higgs_NNLO_gg_LP_cor[i].err+res_higgs_NNLO_gg_delta[i].err, res_higgs_NNLO_gg_hard[i].prob+res_higgs_NNLO_gg_LP_cor[i].prob+res_higgs_NNLO_gg_delta[i].prob});
 				}
 		}
-		else{	
+		else{
 		if(LO&&higgs){
 			cout << "working on LO" << endl;
 			higgs_LO_gg_full = call_cuhre_higgs("LO","gg","LP",fitPDF);
 		}
 		if(NLO&&higgs){
-			
+
 			cout << "working on NLO" << endl;
 			res_higgs_NLO_gg_hard = call_cuhre_higgs("NLO","gg","reg",fitPDF);
 			res_higgs_NLO_gg_LP_part1 = call_cuhre_higgs("NLO","gg","LP",fitPDF);
@@ -532,7 +607,7 @@ int main(int argc, char* argv[]){
 			higgs_NLO_qg_powers = call_cuhre_higgs("NLO","qg","exp",fitPDF,10);
 			higgs_NLO_qqbar_powers = call_cuhre_higgs("NLO","qqbar","exp",fitPDF,10);
 			higgs_NLO_gg_full.push_back({res_higgs_NLO_gg_hard[0].res+res_higgs_NLO_gg_LP_cor[0].res+res_higgs_NLO_gg_delta[0].res, res_higgs_NLO_gg_hard[0].err+res_higgs_NLO_gg_LP_cor[0].err+res_higgs_NLO_gg_delta[0].err, res_higgs_NLO_gg_hard[0].prob+res_higgs_NLO_gg_LP_cor[0].prob+res_higgs_NLO_gg_delta[0].prob});
-			
+
 		}
 		if(NNLO&&higgs){
 			cout << "working on NNLO" << endl;
@@ -617,7 +692,7 @@ int main(int argc, char* argv[]){
 	    if((PDFmemuse == true) && (fitPDF == false))
 		{
 			for(int i = 0; i < 101;i++)
-				{	
+				{
 					use_member = i;
 					update_defaults();
 					DY_LO_qqbar_full.push_back(call_cuhre_dy("LO","qqbar","LP",fitPDF)[0]);
@@ -636,14 +711,14 @@ int main(int argc, char* argv[]){
 					res_DY_NNLO_qq_full.push_back(call_cuhre_dy("NNLO","qq","full",fitPDF)[0]);
 					res_DY_NNLO_gg_full.push_back(call_cuhre_dy("NNLO","gg","full",fitPDF)[0]);
 					res_DY_NNLO_qqbar_LP.push_back({res_DY_NNLO_qqbar_LP_part1[i].res + res_DY_NNLO_qqbar_LP_cor[i].res, res_DY_NNLO_qqbar_LP_part1[i].err + res_DY_NNLO_qqbar_LP_cor[i].err, res_DY_NNLO_qqbar_LP_part1[i].prob + res_DY_NNLO_qqbar_LP_cor[i].prob});
-					DY_NNLO_qqbar_full.push_back({res_DY_NNLO_qqbar_hard[i].res+res_DY_NNLO_qqbar_LP_cor[i].res+res_DY_NNLO_qqbar_delta[i].res, res_DY_NNLO_qqbar_hard[i].err+res_DY_NNLO_qqbar_LP_cor[i].err+res_DY_NNLO_qqbar_delta[i].err, res_DY_NNLO_qqbar_hard[i].prob+res_DY_NNLO_qqbar_LP_cor[i].prob+res_DY_NNLO_qqbar_delta[i].prob});	
+					DY_NNLO_qqbar_full.push_back({res_DY_NNLO_qqbar_hard[i].res+res_DY_NNLO_qqbar_LP_cor[i].res+res_DY_NNLO_qqbar_delta[i].res, res_DY_NNLO_qqbar_hard[i].err+res_DY_NNLO_qqbar_LP_cor[i].err+res_DY_NNLO_qqbar_delta[i].err, res_DY_NNLO_qqbar_hard[i].prob+res_DY_NNLO_qqbar_LP_cor[i].prob+res_DY_NNLO_qqbar_delta[i].prob});
 					cout << DY_NLO_qqbar_full[i].res << endl;
 				}
 		}
 		else
 		{
 		update_defaults();
-	   
+
 		if(LO&&DY){
 			cout << "working on LO" << endl;
 			DY_LO_qqbar_full = call_cuhre_dy("LO","qqbar","full",fitPDF);
@@ -740,9 +815,9 @@ int main(int argc, char* argv[]){
   if(ZZ){
 		cout << "working on ZZ" << endl;
 		if((PDFmemuse == true) && (fitPDF == false))
-		{		
+		{
 			for(int i = 0; i < 101;i++)
-			{	
+			{
 				use_member = i;
 				if(full){
 					Q = 2.*sqrt(mZ2);
@@ -750,7 +825,7 @@ int main(int argc, char* argv[]){
 					update_defaults();
 					zz_LO_full.push_back(call_cuhre_diboson("LOfull","ZZ",fitPDF)[0]);
 				}
-				if(diff){	
+				if(diff){
 					update_defaults();
 					zz_LO_diff.push_back(call_cuhre_diboson("LOdiff","ZZ",fitPDF)[0]);
 				}
@@ -767,12 +842,12 @@ int main(int argc, char* argv[]){
 				if(RES){
 					cout << "computing the resummed results (total cross-section)" << endl;
 					cout << "LP NNLL + NLP LL" << endl;
-					ISNNLL = 1;
-					ISNLP = 1;
-					ISLL = 1;
-					ISNLL = 1;
-					resummedM_zz_LP_NNLL_NLP_LL = call_cuhre_diboson("resumfullM","ZZ",fitPDF);
-					resummedQ_zz_LP_NNLL_NLP_LL = call_cuhre_diboson("resumfullQ","ZZ",fitPDF);
+					//ISNNLL = 1;
+					//ISNLP = 1;
+					//ISLL = 1;
+					//ISNLL = 1;
+					//resummedM_zz_LP_NNLL_NLP_LL = call_cuhre_diboson("resumfullM","ZZ",fitPDF);
+					//resummedQ_zz_LP_NNLL_NLP_LL = call_cuhre_diboson("resumfullQ","ZZ",fitPDF);
 
 					cout << "LP NLL + NLP LL" << endl;
 					ISNNLL = 0;
@@ -791,13 +866,13 @@ int main(int argc, char* argv[]){
 					resummedM_zz_LP_LL_NLP_LL = call_cuhre_diboson("resumfullM","ZZ",fitPDF);
 					resummedQ_zz_LP_LL_NLP_LL = call_cuhre_diboson("resumfullQ","ZZ",fitPDF);
 
-					cout << "LP NNLL" << endl;
-					ISNNLL = 1;
-					ISNLP = 0;
-					ISLL = 1;
-					ISNLL = 1;
-					resummedM_zz_LP_NNLL = call_cuhre_diboson("resumfullM","ZZ",fitPDF);
-					resummedQ_zz_LP_NNLL = call_cuhre_diboson("resumfullQ","ZZ",fitPDF);
+					//cout << "LP NNLL" << endl;
+					//ISNNLL = 1;
+					//ISNLP = 0;
+					//ISLL = 1;
+					//ISNLL = 1;
+					//resummedM_zz_LP_NNLL = call_cuhre_diboson("resumfullM","ZZ",fitPDF);
+					//resummedQ_zz_LP_NNLL = call_cuhre_diboson("resumfullQ","ZZ",fitPDF);
 					cout << "LP NLL" << endl;
 					ISNNLL = 0;
 					ISNLP = 0;
@@ -821,12 +896,12 @@ int main(int argc, char* argv[]){
 			zz_LO_diff = call_cuhre_diboson("LOdiff","ZZ",fitPDF);
 			if(RES){
 				cout << "computing the resummed results (total cross-section)" << endl;
-				cout << "LP NNLL + NLP LL" << endl;
-				ISNNLL = 1;
-				ISNLP = 1;
-				ISLL = 1;
-				ISNLL = 1;
-				resummed_zz_diff_LP_NNLL_NLP_LL = call_cuhre_diboson("resumdiff","ZZ",fitPDF);
+				//cout << "LP NNLL + NLP LL" << endl;
+				//ISNNLL = 1;
+				//ISNLP = 1;
+				//ISLL = 1;
+				//ISNLL = 1;
+				//resummed_zz_diff_LP_NNLL_NLP_LL = call_cuhre_diboson("resumdiff","ZZ",fitPDF);
 
 				cout << "LP NLL + NLP LL" << endl;
 				ISNNLL = 0;
@@ -843,12 +918,12 @@ int main(int argc, char* argv[]){
 
 				resummed_zz_diff_LP_LL_NLP_LL = call_cuhre_diboson("resumdiff","ZZ",fitPDF);
 
-				cout << "LP NNLL" << endl;
-				ISNNLL = 1;
-				ISNLP = 0;
-				ISLL = 1;
-				ISNLL = 1;
-				resummed_zz_diff_LP_NNLL = call_cuhre_diboson("resumdiff","ZZ",fitPDF);
+				//cout << "LP NNLL" << endl;
+				//ISNNLL = 1;
+				//ISNLP = 0;
+				//ISLL = 1;
+				//ISNLL = 1;
+				//resummed_zz_diff_LP_NNLL = call_cuhre_diboson("resumdiff","ZZ",fitPDF);
 				cout << "LP NLL" << endl;
 				ISNNLL = 0;
 				ISNLP = 0;
@@ -871,7 +946,7 @@ int main(int argc, char* argv[]){
 		if((PDFmemuse == true) && (fitPDF == false))
 		{
 			for(int i = 0; i < 101;i++)
-			{	
+			{
 				use_member = i;
 				if(full){
 					Q = 2.*sqrt(mW2);
@@ -879,7 +954,7 @@ int main(int argc, char* argv[]){
 					update_defaults();
 					ww_LO_full.push_back(call_cuhre_diboson("LOfull","WW",fitPDF)[0]);
 				}
-				if(diff){	
+				if(diff){
 					update_defaults();
 					ww_LO_diff.push_back(call_cuhre_diboson("LOdiff","WW",fitPDF)[0]);
 				}
@@ -894,13 +969,13 @@ int main(int argc, char* argv[]){
 				ww_LO_full = call_cuhre_diboson("LOfull","WW",fitPDF);
 				if(RES){
 					cout << "computing the resummed results (total cross-section)" << endl;
-					cout << "LP NNLL + NLP LL" << endl;
-					ISNNLL = 1;
-					ISNLP = 1;
-					ISLL = 1;
-					ISNLL = 1;
-					resummedM_ww_LP_NNLL_NLP_LL = call_cuhre_diboson("resumfullM","WW",fitPDF);
-					resummedQ_ww_LP_NNLL_NLP_LL = call_cuhre_diboson("resumfullQ","WW",fitPDF);
+					//cout << "LP NNLL + NLP LL" << endl;
+					//ISNNLL = 1;
+					//ISNLP = 1;
+					//ISLL = 1;
+					//ISNLL = 1;
+					//resummedM_ww_LP_NNLL_NLP_LL = call_cuhre_diboson("resumfullM","WW",fitPDF);
+					//resummedQ_ww_LP_NNLL_NLP_LL = call_cuhre_diboson("resumfullQ","WW",fitPDF);
 
 					cout << "LP NLL + NLP LL" << endl;
 					ISNNLL = 0;
@@ -919,13 +994,13 @@ int main(int argc, char* argv[]){
 					resummedM_ww_LP_LL_NLP_LL = call_cuhre_diboson("resumfullM","WW",fitPDF);
 					resummedQ_ww_LP_LL_NLP_LL = call_cuhre_diboson("resumfullQ","WW",fitPDF);
 
-					cout << "LP NNLL" << endl;
-					ISNNLL = 1;
-					ISNLP = 0;
-					ISLL = 1;
-					ISNLL = 1;
-					resummedM_ww_LP_NNLL = call_cuhre_diboson("resumfullM","WW",fitPDF);
-					resummedQ_ww_LP_NNLL = call_cuhre_diboson("resumfullQ","WW",fitPDF);
+					//cout << "LP NNLL" << endl;
+					//ISNNLL = 1;
+					//ISNLP = 0;
+					//ISLL = 1;
+					//ISNLL = 1;
+					//resummedM_ww_LP_NNLL = call_cuhre_diboson("resumfullM","WW",fitPDF);
+					//resummedQ_ww_LP_NNLL = call_cuhre_diboson("resumfullQ","WW",fitPDF);
 					cout << "LP NLL" << endl;
 					ISNNLL = 0;
 					ISNLP = 0;
@@ -949,12 +1024,12 @@ int main(int argc, char* argv[]){
 			ww_LO_diff = call_cuhre_diboson("LOdiff","WW",fitPDF);
 			if(RES){
 				cout << "computing the resummed results (total cross-section)" << endl;
-				cout << "LP NNLL + NLP LL" << endl;
-				ISNNLL = 1;
-				ISNLP = 1;
-				ISLL = 1;
-				ISNLL = 1;
-				resummed_ww_diff_LP_NNLL_NLP_LL = call_cuhre_diboson("resumdiff","WW",fitPDF);
+				//cout << "LP NNLL + NLP LL" << endl;
+				//ISNNLL = 1;
+				//ISNLP = 1;
+				//ISLL = 1;
+				//ISNLL = 1;
+				//resummed_ww_diff_LP_NNLL_NLP_LL = call_cuhre_diboson("resumdiff","WW",fitPDF);
 
 				cout << "LP NLL + NLP LL" << endl;
 				ISNNLL = 0;
@@ -971,12 +1046,12 @@ int main(int argc, char* argv[]){
 
 				resummed_ww_diff_LP_LL_NLP_LL = call_cuhre_diboson("resumdiff","WW",fitPDF);
 
-				cout << "LP NNLL" << endl;
-				ISNNLL = 1;
-				ISNLP = 0;
-				ISLL = 1;
-				ISNLL = 1;
-				resummed_ww_diff_LP_NNLL = call_cuhre_diboson("resumdiff","WW",fitPDF);
+				//cout << "LP NNLL" << endl;
+				//ISNNLL = 1;
+				//ISNLP = 0;
+				//ISLL = 1;
+				//ISNLL = 1;
+				//resummed_ww_diff_LP_NNLL = call_cuhre_diboson("resumdiff","WW",fitPDF);
 				cout << "LP NLL" << endl;
 				ISNNLL = 0;
 				ISNLP = 0;
@@ -994,12 +1069,12 @@ int main(int argc, char* argv[]){
 		}
 	}
 }
-	if(hh){
+	if(hh && !SUSY){
 		cout << "working on hh" << endl;
 		if((PDFmemuse == true) && (fitPDF == false))
 		{
 			for(int i = 0; i < 101;i++)
-			{	
+			{
 				use_member = i;
 				if(full){
 					Q = 2.*sqrt(mH2);
@@ -1007,7 +1082,7 @@ int main(int argc, char* argv[]){
 					update_defaults();
 					hh_LO_full.push_back(call_cuhre_dihiggs("SM","full", fitPDF)[0]);
 				}
-				if(diff){	
+				if(diff){
 					update_defaults();
 					hh_LO_diff.push_back(call_cuhre_dihiggs("SM","diff",fitPDF)[0]);
 				}
@@ -1027,12 +1102,12 @@ int main(int argc, char* argv[]){
 			hh_LO_diff = call_cuhre_dihiggs("SM","diff",fitPDF);
 			if(RES){
 				cout << "computing the resummed results (total cross-section)" << endl;
-				cout << "LP NNLL + NLP LL" << endl;
-				ISNNLL = 1;
-				ISNLP = 1;
-				ISLL = 1;
-				ISNLL = 1;
-				resummed_hh_diff_LP_NNLL_NLP_LL = call_cuhre_dihiggs("SM","resumdiff",fitPDF);
+				//cout << "LP NNLL + NLP LL" << endl;
+				//ISNNLL = 1;
+				//ISNLP = 1;
+				//ISLL = 1;
+				//ISNLL = 1;
+				//resummed_hh_diff_LP_NNLL_NLP_LL = call_cuhre_dihiggs("SM","resumdiff",fitPDF);
 
 				cout << "LP NLL + NLP LL" << endl;
 				ISNNLL = 0;
@@ -1049,13 +1124,13 @@ int main(int argc, char* argv[]){
 
 				resummed_hh_diff_LP_LL_NLP_LL = call_cuhre_dihiggs("SM","resumdiff",fitPDF);
 
-				cout << "LP NNLL" << endl;
-				ISNNLL = 1;
-				ISNLP = 0;
-				ISLL = 1;
-				ISNLL = 1;
-				resummed_hh_diff_LP_NNLL = call_cuhre_dihiggs("SM","resumdiff",fitPDF);
-        cout << "LP NLL" << endl;
+				//cout << "LP NNLL" << endl;
+				//ISNNLL = 1;
+				//ISNLP = 0;
+				//ISLL = 1;
+				//ISNLL = 1;
+				//resummed_hh_diff_LP_NNLL = call_cuhre_dihiggs("SM","resumdiff",fitPDF);
+				cout << "LP NLL" << endl;
 				ISNNLL = 0;
 				ISNLP = 0;
 				ISLL = 1;
@@ -1072,20 +1147,53 @@ int main(int argc, char* argv[]){
 		}
 	}
 }
-	/*if(PF){
-			cout << "computing NLO qqbar (prompt photon)" << endl;
-		    res_pf_NLO_qqbar_hard = call_vegas(init_vegas_pf("NLO"), params);
-			res_pf_NLO_qqbar_LP_part1 = call_vegas(init_vegas_pf("NLO","LP"), params);
-			res_pf_NLO_qqbar_LP_cor = call_vegas(init_vegas_pf("NLO","LP_corr"), params);
-			res_pf_NLO_qqbar_delta = call_vegas(init_vegas_pf("NLO","delta"), params);
-			res_pf_NLO_qqbar_LP[0].res = res_pf_NLO_qqbar_LP_part1[0].res + res_pf_NLO_qqbar_LP_cor[0].res;
-			res_pf_NLO_qqbar_LP[0].err = res_pf_NLO_qqbar_LP_part1[0].err + res_pf_NLO_qqbar_LP_cor[0].err;
-			res_pf_NLO_qqbar_full[0].res = res_pf_NLO_qqbar_LP[0].res + res_pf_NLO_qqbar_delta[0].res + res_pf_NLO_qqbar_hard[0].res;
-			res_pf_NLO_qqbar_full[0].err = res_pf_NLO_qqbar_LP[0].err + res_pf_NLO_qqbar_delta[0].err + res_pf_NLO_qqbar_hard[0].err;
-			res_pf_NLO_qqbar_accum[0].res = res_pf_NLO_qqbar_LP[0].res+res_pf_NLO_qqbar_delta[0].res;
-			res_pf_NLO_qqbar_accum[0].err = res_pf_NLO_qqbar_LP[0].err+res_pf_NLO_qqbar_delta[0].err;
+	if(hh && SUSY){
+		cout << tb << " " << SUSYset << endl;
+		cout << "working on hh" << endl;
+		set_SUSY(SUSYset,tb,true);
+		if(full){
+				Q = 2.*sqrt(mH2);
+				Q2 = pow(Q,2);
+				update_defaults();
+				cout << "working on the total cross section" << endl;
+				hh_LO_full = call_cuhre_dihiggs("SUSY_hh","full",fitPDF);
+		}
+		if(diff){
+	  	update_defaults();
+			hh_LO_diff = call_cuhre_dihiggs("SUSY_hh","diff",fitPDF);
+			if(RES){
+				cout << "computing the resummed results (total cross-section)" << endl;
+				cout << "LP NLL + NLP LL" << endl;
+				ISNNLL = 0;
+				ISNLP = 1;
+				ISLL = 1;
+				ISNLL = 1;
+				resummed_hh_diff_LP_NLL_NLP_LL = call_cuhre_dihiggs("SUSY_hh","resumdiff",fitPDF);
 
-		}*/
+				cout << "LP LL + NLP LL" << endl;
+				ISNNLL = 0;
+				ISNLP = 1;
+				ISLL = 1;
+				ISNLL = 0;
+
+				resummed_hh_diff_LP_LL_NLP_LL = call_cuhre_dihiggs("SUSY_hh","resumdiff",fitPDF);
+
+				cout << "LP NLL" << endl;
+				ISNNLL = 0;
+				ISNLP = 0;
+				ISLL = 1;
+				ISNLL = 1;
+				resummed_hh_diff_LP_NLL = call_cuhre_dihiggs("SUSY_hh","resumdiff",fitPDF);
+
+				cout << "LP LL" << endl;
+				ISNNLL = 0;
+				ISNLP = 0;
+				ISLL = 1;
+				ISNLL = 0;
+				resummed_hh_diff_LP_LL = call_cuhre_dihiggs("SUSY_hh","resumdiff",fitPDF);
+			}
+		}
+	}
 
 
 	/////////////////////////
@@ -1102,9 +1210,9 @@ int main(int argc, char* argv[]){
 			output << "LO, NLOgg, NLOqg, NLOqqbar, NNLOgg, NNLOqg, NNLOqqbar, NNLOqq, NNLOqqp \n" << endl;
 			for(int i = 0; i < higgs_LO_gg_full.size(); i++){
 			output << "	member "<<i<<" : " <<  higgs_LO_gg_full[i].res << "," <<  higgs_NLO_gg_full[i].res << "," <<  res_higgs_NLO_qg_full[i].res << ","
-			<<  res_higgs_NLO_qqbar_full[i].res << "," <<  higgs_NNLO_gg_full[i].res << ","  <<  res_higgs_NNLO_qg_full[i].res << "," 
-			 <<  res_higgs_NNLO_qqbar_full[i].res << ","  <<  res_higgs_NNLO_qq_full[i].res << ","  <<  res_higgs_NNLO_qqp_full[i].res << endl; 
-			 
+			<<  res_higgs_NLO_qqbar_full[i].res << "," <<  higgs_NNLO_gg_full[i].res << ","  <<  res_higgs_NNLO_qg_full[i].res << ","
+			 <<  res_higgs_NNLO_qqbar_full[i].res << ","  <<  res_higgs_NNLO_qq_full[i].res << ","  <<  res_higgs_NNLO_qqp_full[i].res << endl;
+
 			}
 		}
 		else
@@ -1286,9 +1394,9 @@ int main(int argc, char* argv[]){
 			output << "LO, NLOqqbar, NLOqg, NNLOqqbar, NNLOqg, NNLOgg, NNLOqq \n" << endl;
 			for(int i = 0; i < DY_LO_qqbar_full.size(); i++){
 			output << "	member "<<i<<" : " <<  DY_LO_qqbar_full[i].res << "," <<  DY_NLO_qqbar_full[i].res << "," <<  res_DY_NLO_qg_full[i].res << ","
-		     <<  DY_NNLO_qqbar_full[i].res << ","  <<  res_DY_NNLO_qg_full[i].res << "," 
-			 <<  res_DY_NNLO_gg_full[i].res << ","  <<  res_DY_NNLO_qq_full[i].res << endl; 
-			 
+		     <<  DY_NNLO_qqbar_full[i].res << ","  <<  res_DY_NNLO_qg_full[i].res << ","
+			 <<  res_DY_NNLO_gg_full[i].res << ","  <<  res_DY_NNLO_qq_full[i].res << endl;
+
 			}
 		}
 		else{
@@ -1442,7 +1550,7 @@ int main(int argc, char* argv[]){
 		}
 	}
 }
-	if(hh){
+	if((hh && !SUSY)){
 		output << "======================================================" << endl;
 		output << "Di-higgs results" << endl;
 		output << "======================================================" << endl;
@@ -1452,12 +1560,12 @@ int main(int argc, char* argv[]){
 		{
 			if(full){
 				for(int i = 0; i < hh_LO_full.size(); i++){
-					output << "	member "<<i<<" : " <<  hh_LO_full[i].res << endl; 
+					output << "	member "<<i<<" : " <<  hh_LO_full[i].res << endl;
 				}
 			}
 			if(diff){
 				for(int i = 0; i < hh_LO_diff.size(); i++){
-					output << "	member "<<i<<" : " <<  hh_LO_diff[i].res << endl; 
+					output << "	member "<<i<<" : " <<  hh_LO_diff[i].res << endl;
 				}
 			 }
 		}
@@ -1486,10 +1594,66 @@ int main(int argc, char* argv[]){
 			/////////////////////////////////////
 
 			if(diff){
-			output << "Resummed (LP NNLL + NLP LL): 		" << resummed_hh_diff_LP_NNLL_NLP_LL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_NNLL_NLP_LL[0].err <<  endl;
+			//output << "Resummed (LP NNLL + NLP LL): 		" << resummed_hh_diff_LP_NNLL_NLP_LL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_NNLL_NLP_LL[0].err <<  endl;
 			output << "Resummed (LP NLL + NLP LL): 		" << resummed_hh_diff_LP_NLL_NLP_LL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_NLL_NLP_LL[0].err <<  endl;
 			output << "Resummed (LP LL + NLP LL): 		" << resummed_hh_diff_LP_LL_NLP_LL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_LL_NLP_LL[0].err <<  endl;
-			output << "Resummed (LP NNLL): 		" << resummed_hh_diff_LP_NNLL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_NNLL[0].err <<  endl;
+			//output << "Resummed (LP NNLL): 		" << resummed_hh_diff_LP_NNLL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_NNLL[0].err <<  endl;
+			output << "Resummed (LP NLL): 		" << resummed_hh_diff_LP_NLL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_NLL[0].err <<  endl;
+			output << "Resummed (LP LL): 		" << resummed_hh_diff_LP_LL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_LL[0].err <<  endl;
+			output << "======================================================" << endl;
+			}
+		}
+	}
+}
+	if((hh && SUSY)){
+		output << "======================================================" << endl;
+		output << "Di-higgs SUSY results" << endl;
+		output << "======================================================" << endl;
+		output << "Q = " << Q << ", muF = " << muF << ", muR = " << muR << endl;
+		output << "mH2 = " << sqrt(mH2) << ",mHeavy2 = " << sqrt(mHeavy2) << ",mA2 = " << sqrt(mA2) << endl;
+		output << "======================================================" << endl;
+		if(PDFmemuse)
+		{
+			if(full){
+				for(int i = 0; i < hh_LO_full.size(); i++){
+					output << "	member "<<i<<" : " <<  hh_LO_full[i].res << endl;
+				}
+			}
+			if(diff){
+				for(int i = 0; i < hh_LO_diff.size(); i++){
+					output << "	member "<<i<<" : " <<  hh_LO_diff[i].res << endl;
+				}
+			 }
+		}
+		else
+		{
+			if(LO){
+
+			/////////////////////////////////////
+			///
+			output << "===================" << endl;
+			output << "LO results" << endl;
+			output << "===================" << endl;
+			///
+			/////////////////////////////////////
+
+			output << "---------------------------------------" << endl;
+
+			if(full) output << "Total xsec:					" << hh_LO_full[0].res << " pb +/- " << hh_LO_full[0].err << " " << hh_LO_full[0].prob << endl;
+			if(diff) output << "Differential xsec:					" << hh_LO_diff[0].res << " pb/GeV +/- " << hh_LO_diff[0].err << " " << hh_LO_diff[0].prob << endl;
+		}
+		if(RES){
+			output << "===================" << endl;
+			output << "Resummed results" << endl;
+			output << "===================" << endl;
+			///
+			/////////////////////////////////////
+
+			if(diff){
+			//output << "Resummed (LP NNLL + NLP LL): 		" << resummed_hh_diff_LP_NNLL_NLP_LL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_NNLL_NLP_LL[0].err <<  endl;
+			output << "Resummed (LP NLL + NLP LL): 		" << resummed_hh_diff_LP_NLL_NLP_LL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_NLL_NLP_LL[0].err <<  endl;
+			output << "Resummed (LP LL + NLP LL): 		" << resummed_hh_diff_LP_LL_NLP_LL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_LL_NLP_LL[0].err <<  endl;
+			//output << "Resummed (LP NNLL): 		" << resummed_hh_diff_LP_NNLL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_NNLL[0].err <<  endl;
 			output << "Resummed (LP NLL): 		" << resummed_hh_diff_LP_NLL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_NLL[0].err <<  endl;
 			output << "Resummed (LP LL): 		" << resummed_hh_diff_LP_LL[0].res << " pb/GeV +/- " << resummed_hh_diff_LP_LL[0].err <<  endl;
 			output << "======================================================" << endl;
@@ -1503,17 +1667,17 @@ int main(int argc, char* argv[]){
 		output << "======================================================" << endl;
 		output << "Q = " << Q << ", muF = " << muF << ", muR = " << muR << endl;
 		output << "======================================================" << endl;
-		
+
 		if(PDFmemuse)
 		{
 			if(full){
 				for(int i = 0; i < zz_LO_full.size(); i++){
-					output << "	member "<<i<<" : " <<  zz_LO_full[i].res << endl; 
+					output << "	member "<<i<<" : " <<  zz_LO_full[i].res << endl;
 				}
 			}
 			if(diff){
 				for(int i = 0; i < zz_LO_diff.size(); i++){
-					output << "	member "<<i<<" : " <<  zz_LO_diff[i].res << endl; 
+					output << "	member "<<i<<" : " <<  zz_LO_diff[i].res << endl;
 				}
 			 }
 		}
@@ -1542,27 +1706,27 @@ int main(int argc, char* argv[]){
 				/////////////////////////////////////
 
 				if(full){
-				output << "ResummedQ (LP NNLL + NLP LL): 		" << resummedQ_zz_LP_NNLL_NLP_LL[0].res << " pb +/- " << resummedQ_zz_LP_NNLL_NLP_LL[0].err <<  endl;
+				//output << "ResummedQ (LP NNLL + NLP LL): 		" << resummedQ_zz_LP_NNLL_NLP_LL[0].res << " pb +/- " << resummedQ_zz_LP_NNLL_NLP_LL[0].err <<  endl;
 				output << "ResummedQ (LP NLL + NLP LL): 		" << resummedQ_zz_LP_NLL_NLP_LL[0].res << " pb +/- " << resummedQ_zz_LP_NLL_NLP_LL[0].err <<  endl;
 				output << "ResummedQ (LP LL + NLP LL): 		" << resummedQ_zz_LP_LL_NLP_LL[0].res << " pb +/- " << resummedQ_zz_LP_LL_NLP_LL[0].err <<  endl;
-				output << "ResummedQ (LP NNLL): 		" << resummedQ_zz_LP_NNLL[0].res << " pb +/- " << resummedQ_zz_LP_NNLL[0].err <<  endl;
+				//output << "ResummedQ (LP NNLL): 		" << resummedQ_zz_LP_NNLL[0].res << " pb +/- " << resummedQ_zz_LP_NNLL[0].err <<  endl;
 				output << "ResummedQ (LP NLL): 		" << resummedQ_zz_LP_NLL[0].res << " pb +/- " << resummedQ_zz_LP_NLL[0].err <<  endl;
 				output << "ResummedQ (LP LL): 		" << resummedQ_zz_LP_LL[0].res << " pb +/- " << resummedQ_zz_LP_LL[0].err <<  endl;
 				output << "------------------------------------------------------" << endl;
-				output << "ResummedM (LP NNLL + NLP LL): 		" << resummedM_zz_LP_NNLL_NLP_LL[0].res << " pb +/- " << resummedM_zz_LP_NNLL_NLP_LL[0].err <<  endl;
+				//output << "ResummedM (LP NNLL + NLP LL): 		" << resummedM_zz_LP_NNLL_NLP_LL[0].res << " pb +/- " << resummedM_zz_LP_NNLL_NLP_LL[0].err <<  endl;
 				output << "ResummedM (LP NLL + NLP LL): 		" << resummedM_zz_LP_NLL_NLP_LL[0].res << " pb +/- " << resummedM_zz_LP_NLL_NLP_LL[0].err <<  endl;
 				output << "ResummedM (LP LL + NLP LL): 		" << resummedM_zz_LP_LL_NLP_LL[0].res << " pb +/- " << resummedM_zz_LP_LL_NLP_LL[0].err <<  endl;
-				output << "ResummedM (LP NNLL): 		" << resummedM_zz_LP_NNLL[0].res << " pb +/- " << resummedM_zz_LP_NNLL[0].err <<  endl;
+				//output << "ResummedM (LP NNLL): 		" << resummedM_zz_LP_NNLL[0].res << " pb +/- " << resummedM_zz_LP_NNLL[0].err <<  endl;
 				output << "ResummedM (LP NLL): 		" << resummedM_zz_LP_NLL[0].res << " pb +/- " << resummedM_zz_LP_NLL[0].err <<  endl;
 				output << "ResummedM (LP LL): 		" << resummedM_zz_LP_LL[0].res << " pb +/- " << resummedM_zz_LP_LL[0].err <<  endl;
 				output << "======================================================" << endl;
 
 				}
 				if(diff){
-				output << "Resummed (LP NNLL + NLP LL): 		" << resummed_zz_diff_LP_NNLL_NLP_LL[0].res << " pb/GeV +/- " << resummed_zz_diff_LP_NNLL_NLP_LL[0].err <<  endl;
+				//output << "Resummed (LP NNLL + NLP LL): 		" << resummed_zz_diff_LP_NNLL_NLP_LL[0].res << " pb/GeV +/- " << resummed_zz_diff_LP_NNLL_NLP_LL[0].err <<  endl;
 				output << "Resummed (LP NLL + NLP LL): 		" << resummed_zz_diff_LP_NLL_NLP_LL[0].res << " pb/GeV +/- " << resummed_zz_diff_LP_NLL_NLP_LL[0].err <<  endl;
 				output << "Resummed (LP LL + NLP LL): 		" << resummed_zz_diff_LP_LL_NLP_LL[0].res << " pb/GeV +/- " << resummed_zz_diff_LP_LL_NLP_LL[0].err <<  endl;
-				output << "Resummed (LP NNLL): 		" << resummed_zz_diff_LP_NNLL[0].res << " pb/GeV +/- " << resummed_zz_diff_LP_NNLL[0].err <<  endl;
+				//output << "Resummed (LP NNLL): 		" << resummed_zz_diff_LP_NNLL[0].res << " pb/GeV +/- " << resummed_zz_diff_LP_NNLL[0].err <<  endl;
 				output << "Resummed (LP NLL): 		" << resummed_zz_diff_LP_NLL[0].res << " pb/GeV +/- " << resummed_zz_diff_LP_NLL[0].err <<  endl;
 				output << "Resummed (LP LL): 		" << resummed_zz_diff_LP_LL[0].res << " pb/GeV +/- " << resummed_zz_diff_LP_LL[0].err <<  endl;
 				output << "======================================================" << endl;
@@ -1580,12 +1744,12 @@ int main(int argc, char* argv[]){
 		{
 			if(full){
 				for(int i = 0; i < ww_LO_full.size(); i++){
-					output << "	member "<<i<<" : " <<  ww_LO_full[i].res << endl; 
+					output << "	member "<<i<<" : " <<  ww_LO_full[i].res << endl;
 				}
 			}
 			if(diff){
 				for(int i = 0; i < ww_LO_diff.size(); i++){
-					output << "	member "<<i<<" : " <<  ww_LO_diff[i].res << endl; 
+					output << "	member "<<i<<" : " <<  ww_LO_diff[i].res << endl;
 				}
 			 }
 		}
@@ -1614,27 +1778,27 @@ int main(int argc, char* argv[]){
 				/////////////////////////////////////
 
 				if(full){
-				output << "ResummedQ (LP NNLL + NLP LL): 		" << resummedQ_ww_LP_NNLL_NLP_LL[0].res << " pb +/- " << resummedQ_ww_LP_NNLL_NLP_LL[0].err <<  endl;
+				//output << "ResummedQ (LP NNLL + NLP LL): 		" << resummedQ_ww_LP_NNLL_NLP_LL[0].res << " pb +/- " << resummedQ_ww_LP_NNLL_NLP_LL[0].err <<  endl;
 				output << "ResummedQ (LP NLL + NLP LL): 		" << resummedQ_ww_LP_NLL_NLP_LL[0].res << " pb +/- " << resummedQ_ww_LP_NLL_NLP_LL[0].err <<  endl;
 				output << "ResummedQ (LP LL + NLP LL): 		" << resummedQ_ww_LP_LL_NLP_LL[0].res << " pb +/- " << resummedQ_ww_LP_LL_NLP_LL[0].err <<  endl;
-				output << "ResummedQ (LP NNLL): 		" << resummedQ_ww_LP_NNLL[0].res << " pb +/- " << resummedQ_ww_LP_NNLL[0].err <<  endl;
+				//output << "ResummedQ (LP NNLL): 		" << resummedQ_ww_LP_NNLL[0].res << " pb +/- " << resummedQ_ww_LP_NNLL[0].err <<  endl;
 				output << "ResummedQ (LP NLL): 		" << resummedQ_ww_LP_NLL[0].res << " pb +/- " << resummedQ_ww_LP_NLL[0].err <<  endl;
 				output << "ResummedQ (LP LL): 		" << resummedQ_ww_LP_LL[0].res << " pb +/- " << resummedQ_ww_LP_LL[0].err <<  endl;
 				output << "------------------------------------------------------" << endl;
-				output << "ResummedM (LP NNLL + NLP LL): 		" << resummedM_ww_LP_NNLL_NLP_LL[0].res << " pb +/- " << resummedM_ww_LP_NNLL_NLP_LL[0].err <<  endl;
+				//output << "ResummedM (LP NNLL + NLP LL): 		" << resummedM_ww_LP_NNLL_NLP_LL[0].res << " pb +/- " << resummedM_ww_LP_NNLL_NLP_LL[0].err <<  endl;
 				output << "ResummedM (LP NLL + NLP LL): 		" << resummedM_ww_LP_NLL_NLP_LL[0].res << " pb +/- " << resummedM_ww_LP_NLL_NLP_LL[0].err <<  endl;
 				output << "ResummedM (LP LL + NLP LL): 		" << resummedM_ww_LP_LL_NLP_LL[0].res << " pb +/- " << resummedM_ww_LP_LL_NLP_LL[0].err <<  endl;
-				output << "ResummedM (LP NNLL): 		" << resummedM_ww_LP_NNLL[0].res << " pb +/- " << resummedM_ww_LP_NNLL[0].err <<  endl;
+				//output << "ResummedM (LP NNLL): 		" << resummedM_ww_LP_NNLL[0].res << " pb +/- " << resummedM_ww_LP_NNLL[0].err <<  endl;
 				output << "ResummedM (LP NLL): 		" << resummedM_ww_LP_NLL[0].res << " pb +/- " << resummedM_ww_LP_NLL[0].err <<  endl;
 				output << "ResummedM (LP LL): 		" << resummedM_ww_LP_LL[0].res << " pb +/- " << resummedM_ww_LP_LL[0].err <<  endl;
 				output << "======================================================" << endl;
 
 				}
 				if(diff){
-				output << "Resummed (LP NNLL + NLP LL): 		" << resummed_ww_diff_LP_NNLL_NLP_LL[0].res << " pb/GeV +/- " << resummed_ww_diff_LP_NNLL_NLP_LL[0].err <<  endl;
+				//output << "Resummed (LP NNLL + NLP LL): 		" << resummed_ww_diff_LP_NNLL_NLP_LL[0].res << " pb/GeV +/- " << resummed_ww_diff_LP_NNLL_NLP_LL[0].err <<  endl;
 				output << "Resummed (LP NLL + NLP LL): 		" << resummed_ww_diff_LP_NLL_NLP_LL[0].res << " pb/GeV +/- " << resummed_ww_diff_LP_NLL_NLP_LL[0].err <<  endl;
 				output << "Resummed (LP LL + NLP LL): 		" << resummed_ww_diff_LP_LL_NLP_LL[0].res << " pb/GeV +/- " << resummed_ww_diff_LP_LL_NLP_LL[0].err <<  endl;
-				output << "Resummed (LP NNLL): 		" << resummed_ww_diff_LP_NNLL[0].res << " pb/GeV +/- " << resummed_ww_diff_LP_NNLL[0].err <<  endl;
+				//output << "Resummed (LP NNLL): 		" << resummed_ww_diff_LP_NNLL[0].res << " pb/GeV +/- " << resummed_ww_diff_LP_NNLL[0].err <<  endl;
 				output << "Resummed (LP NLL): 		" << resummed_ww_diff_LP_NLL[0].res << " pb/GeV +/- " << resummed_ww_diff_LP_NLL[0].err <<  endl;
 				output << "Resummed (LP LL): 		" << resummed_ww_diff_LP_LL[0].res << " pb/GeV +/- " << resummed_ww_diff_LP_LL[0].err <<  endl;
 				output << "======================================================" << endl;
@@ -1642,17 +1806,6 @@ int main(int argc, char* argv[]){
 			}
 		}
 	}
-	/*if(PF){
-		output << endl << "RESULTS (prompt photon)" << endl;
-		if(NLO){
-			output << "Total (NLO): " << res_pf_NLO_qqbar_full.res+res_pf_NLO_qqbar_full.res << " pb (" << res_pf_NLO_qqbar_full.err+res_pf_NLO_qqbar_full.err << ")" << endl;
-			output << "Total (NLO, gg): " << res_pf_NLO_qqbar_full.res << " pb (" << res_pf_NLO_qqbar_full.err << ")" << endl;
-			output << "Total (NLO, LP): " << res_pf_NLO_qqbar_LP.res << " pb (" << res_pf_NLO_qqbar_LP.err << ")" << endl;
-	    	output << "Total (NLO, gg delta): " << res_pf_NLO_qqbar_delta.res << " pb (" << res_pf_NLO_qqbar_delta.err << ")" << endl;
-			output << "Total (NLO, gg z): " << res_pf_NLO_qqbar_full.res-res_pf_NLO_qqbar_delta.res << " pb (" << -res_pf_NLO_qqbar_delta.err+res_pf_NLO_qqbar_full.err << ")" << endl;
-		}
-		output << "---------------------------------------------------------------------------" << endl;
-	}*/
 	output.close();
 	return 0;
 }

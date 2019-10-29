@@ -184,12 +184,12 @@ double dihiggs_LO_factor_approx(double scale2, double ctheta){
 double  dihiggs_hh(double scale2, double ctheta){
 
 	double lambdah = lambdahhh, lambdaH = lambdaHhh, Cbox_t = ght*ght, Cbox_b = ghb*ghb;
-	double Cdeltah_t = lambdah*mZ2/(scale2-mH2)*ght;
-	double CdeltaH_t = lambdaH*mZ2/(scale2-mHeavy2)*gHt;
-	double Cdelta_t = Cdeltah_t+CdeltaH_t;
-	double Cdeltah_b = lambdah*mZ2/(scale2-mH2)*ghb;
-	double CdeltaH_b = lambdaH*mZ2/(scale2-mHeavy2)*gHb;
-	double Cdelta_b = Cdeltah_b+CdeltaH_b;
+	complex<double> Cdeltah_t = lambdah*mZ2/(scale2-mH2+I*sqrt(mH2)*GammaH)*ght;
+	complex<double> CdeltaH_t = lambdaH*mZ2/(scale2-mHeavy2+I*sqrt(mHeavy2)*GammaHeavy)*gHt;
+	complex<double> Cdelta_t = Cdeltah_t+CdeltaH_t;
+	complex<double> Cdeltah_b = lambdah*mZ2/(scale2-mH2+I*sqrt(mH2)*GammaH)*ghb;
+	complex<double> CdeltaH_b = lambdaH*mZ2/(scale2-mHeavy2+I*sqrt(mHeavy2)*GammaHeavy)*gHb;
+	complex<double> Cdelta_b = Cdeltah_b+CdeltaH_b;
 	double mC2 = mH2;
 	double mD2 = mH2;
 	double s = scale2;

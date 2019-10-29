@@ -78,6 +78,9 @@ extern double gAd;
 extern double ctt;
 //for SUSY dihiggs;
 
+extern double SUSYset;
+extern double GammaHeavy;
+extern double tb;
 extern double ght;
 extern double gHt;
 extern double gAt;
@@ -122,11 +125,11 @@ extern double xmin_pdfs, xmax_pdfs; //min x, max x
 extern int use_member; //the member that one needs to use
 struct lumni_params {double z; double pT; double xT; double epeta; double emeta; int power; int flavor; int coefficient;};
 
-extern bool DY, higgs, hh, WW, ZZ, diff, full, PF, LO, NLO, NNLO, RES, realPDF, fitPDF;
+extern bool DY, higgs, hh, WW, ZZ, diff, full, PF, LO, NLO, NNLO, RES, realPDF, fitPDF, SUSY;
 
 void print_usage();
 void update_defaults(bool printout = true , bool pdfset = true);
-void set_SUSY(int set, bool printout = true);
+void set_SUSY(float set, float TANB, bool printout = true);
 void read_arguments(int argc, char* argv[]);
 
 extern std::unordered_map<double, std::vector<std::vector<double>>> fitcoeff;
